@@ -1,0 +1,3 @@
+package: github.com/aahainc/aggretastic
+import:
+- package: github.com/olivere/elastic
