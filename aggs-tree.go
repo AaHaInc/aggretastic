@@ -1,14 +1,11 @@
 package aggretastic
 
-import (
-	"fmt"
-	"github.com/olivere/elastic"
-)
+/*
 
 // Aggregation is a tree-ish version of original elastic.Aggregation
 // Besides just attaching subAggregations it can get any of children subAggregations
 // and add another subAggregation to it
-type Aggregation interface {
+type AggregationOld interface {
 	// embedding original elastic.Aggregation interface
 	// is used to support call of `.Source()` method from aggregations' code
 	elastic.Aggregation
@@ -21,6 +18,9 @@ type Aggregation interface {
 
 	// InjectX sets new subAgg into the map of subAggregations only if it NOT exists already
 	InjectX(subAgg elastic.Aggregation, path ...string) error
+
+	// WrapBy
+	//WrapBy(wrapper Aggregation, name string) error
 
 	// Select returns any subAgg by it's path
 	Select(path ...string) Aggregation
@@ -66,6 +66,16 @@ func (a *tree) Inject(subAggregation elastic.Aggregation, path ...string) error 
 
 	return cursor.Inject(subAggregation, path[len(path)-1])
 }
+
+//func (a *tree) WrapBy(wrapper Aggregation, name string) error {
+//	wrapper.Inject(a, name)
+//	*a = *(wrapper.(*FilterAggregation).tree)
+//	return nil
+//}
+//
+//func (a *tree) Source() (interface{}, error) {
+//	return a.root.Source()
+//}
 
 func (a *tree) InjectX(subAggregation elastic.Aggregation, path ...string) error {
 	if len(path) == 0 {
@@ -234,3 +244,5 @@ func (a *Aggregations) InjectX(subAgg elastic.Aggregation, path ...string) error
 
 	return (*a)[name].InjectX(subAgg, path...)
 }
+
+*/

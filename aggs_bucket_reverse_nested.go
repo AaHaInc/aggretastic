@@ -1,84 +1,20 @@
 package aggretastic
 
-// ReverseNestedAggregation defines a special single bucket aggregation
-// that enables aggregating on parent docs from nested documents.
-// Effectively this aggregation can break out of the nested block
-// structure and link to other nested structures or the root document,
-// which allows nesting other aggregations that aren’t part of
-// the nested object in a nested aggregation.
-//
-// See: https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-bucket-reverse-nested-aggregation.html
+import "github.com/olivere/elastic"
+
 type ReverseNestedAggregation struct {
-	*tree
-
-	path string
-	meta map[string]interface{}
+	*aggregation
 }
 
-// NewReverseNestedAggregation initializes a new ReverseNestedAggregation
-// bucket aggregation.
 func NewReverseNestedAggregation() *ReverseNestedAggregation {
-	a := &ReverseNestedAggregation{}
-	a.tree = nilAggregationTree(a)
-
-	return a
-}
-
-// Path set the path to use for this nested aggregation. The path must match
-// the path to a nested object in the mappings. If it is not specified
-// then this aggregation will go back to the root document.
-func (a *ReverseNestedAggregation) Path(path string) *ReverseNestedAggregation {
-	a.path = path
-	return a
+	return &ReverseNestedAggregation{aggregation: nilAggregation(elastic.NewReverseNestedAggregation())}
 }
 
 func (a *ReverseNestedAggregation) SubAggregation(name string, subAggregation Aggregation) *ReverseNestedAggregation {
-	a.subAggregations[name] = subAggregation
+	a.base.(*elastic.ReverseNestedAggregation).SubAggregation(name, subAggregation)
 	return a
 }
 
-// Meta sets the meta data to be included in the aggregation response.
-func (a *ReverseNestedAggregation) Meta(metaData map[string]interface{}) *ReverseNestedAggregation {
-	a.meta = metaData
-	return a
-}
-
-func (a *ReverseNestedAggregation) Source() (interface{}, error) {
-	// Example:
-	//	{
-	//    "aggs" : {
-	//      "reverse_nested" : {
-	//        "path": "..."
-	//      }
-	//    }
-	//	}
-	// This method returns only the { "reverse_nested" : {} } part.
-
-	source := make(map[string]interface{})
-	opts := make(map[string]interface{})
-	source["reverse_nested"] = opts
-
-	if a.path != "" {
-		opts["path"] = a.path
-	}
-
-	// AggregationBuilder (SubAggregations)
-	if len(a.subAggregations) > 0 {
-		aggsMap := make(map[string]interface{})
-		source["aggregations"] = aggsMap
-		for name, aggregate := range a.subAggregations {
-			src, err := aggregate.Source()
-			if err != nil {
-				return nil, err
-			}
-			aggsMap[name] = src
-		}
-	}
-
-	// Add Meta data if available
-	if len(a.meta) > 0 {
-		source["meta"] = a.meta
-	}
-
-	return source, nil
+func (a *ReverseNestedAggregation) Base() *elastic.ReverseNestedAggregation {
+	return a.base.(*elastic.ReverseNestedAggregation)
 }
