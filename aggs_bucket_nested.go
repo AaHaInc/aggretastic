@@ -1,20 +1,55 @@
 package aggretastic
 
-import "github.com/olivere/elastic"
-
 type NestedAggregation struct {
 	*aggregation
+
+	path string
+	meta map[string]interface{}
 }
 
 func NewNestedAggregation() *NestedAggregation {
-	return &NestedAggregation{aggregation: nilAggregation(elastic.NewNestedAggregation())}
+	return &NestedAggregation{aggregation: nilAggregation()}
 }
 
 func (a *NestedAggregation) SubAggregation(name string, subAggregation Aggregation) *NestedAggregation {
-	a.base.(*elastic.NestedAggregation).SubAggregation(name, subAggregation)
+	a.aggregation.setChild(subAggregation, name)
 	return a
 }
 
-func (a *NestedAggregation) Base() *elastic.NestedAggregation {
-	return a.base.(*elastic.NestedAggregation)
+func (a *NestedAggregation) Meta(metaData map[string]interface{}) *NestedAggregation {
+	a.meta = metaData
+	return a
+}
+
+func (a *NestedAggregation) Path(path string) *NestedAggregation {
+	a.path = path
+	return a
+}
+
+func (a *NestedAggregation) Source() (interface{}, error) {
+	source := make(map[string]interface{})
+	opts := make(map[string]interface{})
+	source["nested"] = opts
+
+	opts["path"] = a.path
+
+	// AggregationBuilder (SubAggregations)
+	if len(a.children) > 0 {
+		aggsMap := make(map[string]interface{})
+		source["aggregations"] = aggsMap
+		for name, aggregate := range a.children {
+			src, err := aggregate.Source()
+			if err != nil {
+				return nil, err
+			}
+			aggsMap[name] = src
+		}
+	}
+
+	// Add Meta data if available
+	if len(a.meta) > 0 {
+		source["meta"] = a.meta
+	}
+
+	return source, nil
 }

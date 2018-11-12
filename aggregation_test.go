@@ -7,44 +7,48 @@ import (
 	"testing"
 )
 
-func TestC(t *testing.T) {
+func TestC1(t *testing.T) {
 	sessions := NewFilterAggregation()
-	sessions.Base().Filter(elastic.NewTermQuery("sessions", true))
+	sessions.Filter(elastic.NewTermQuery("sessions", true))
 
 	experiments := NewFilterAggregation()
-	experiments.Base().Filter(elastic.NewTermQuery("experiments", true))
+	experiments.Filter(elastic.NewTermQuery("experiments", true))
 	experiments.Inject(sessions, "sessions")
 
 	toExperiments := NewNestedAggregation()
-	toExperiments.Base().Path("experiments")
+	toExperiments.Path("experiments")
 	toExperiments.Inject(experiments, "experiments.name")
-
-
-	log.Printf("1 %#v", toExperiments)
-	log.Printf("2 %#v", toExperiments.aggregation)
-	log.Printf("3 %#v", toExperiments.aggregation.children["experiments.name"])
-	log.Printf("4 %#v", toExperiments.aggregation.children["experiments.name"].getKey())
-	log.Printf("4 %#v", toExperiments.aggregation.children["experiments.name"].getChild("sessions").getKey())
-	log.Println("")
-	//log.Printf("EXPERIMENTS %#v", toExperiments.aggregation.children["experiments"].getKey())
 
 	// NESTED
 	// 	-> experiments.name:FILTER
 	//		-> sessions:FILTER
 
-
-	log.Println("===========================")
-	render(toExperiments)
-	log.Println("---------------------------")
 	toExperiments.Select("experiments.name", "sessions").WrapBy(NewReverseNestedAggregation(), "back")
 
-	log.Printf("1 %#v", toExperiments)
-	log.Printf("2 %#v", toExperiments.aggregation)
-	log.Printf("3 %#v", toExperiments.aggregation.children["experiments.name"])
-	log.Printf("4 %#v", toExperiments.aggregation.children["experiments.name"].getKey())
-	//log.Printf("4 %#v", toExperiments.aggregation.children["experiments.name"].getChild("back").getKey())
-	log.Printf("5 %#v", toExperiments.aggregation.children["experiments.name"].getChildren())
-	log.Println("")
+	//render(selected)
+	render(toExperiments)
+}
+
+func TestC2(t *testing.T) {
+	sessions := NewFilterAggregation()
+	sessions.Filter(elastic.NewTermQuery("sessions", true))
+	hits := NewFilterAggregation()
+	hits.Filter(elastic.NewTermQuery("hits", true))
+
+	experiments := NewFilterAggregation()
+	experiments.Filter(elastic.NewTermQuery("experiments", true))
+	experiments.Inject(sessions, "sessions")
+	experiments.Inject(hits, "hits")
+
+	toExperiments := NewNestedAggregation()
+	toExperiments.Path("experiments")
+	toExperiments.Inject(experiments, "experiments.name")
+
+	// NESTED
+	// 	-> experiments.name:FILTER
+	//		-> sessions:FILTER
+
+	toExperiments.InjectWrapper(NewReverseNestedAggregation(), "experiments.name", "back")
 
 	//render(selected)
 	render(toExperiments)
