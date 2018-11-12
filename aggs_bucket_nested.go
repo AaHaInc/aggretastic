@@ -12,7 +12,7 @@ func NewNestedAggregation() *NestedAggregation {
 }
 
 func (a *NestedAggregation) SubAggregation(name string, subAggregation Aggregation) *NestedAggregation {
-	a.aggregation.setChild(subAggregation, name)
+	a.setSubAggregation(subAggregation, name)
 	return a
 }
 
@@ -34,10 +34,10 @@ func (a *NestedAggregation) Source() (interface{}, error) {
 	opts["path"] = a.path
 
 	// AggregationBuilder (SubAggregations)
-	if len(a.children) > 0 {
+	if len(a.subAggregations) > 0 {
 		aggsMap := make(map[string]interface{})
 		source["aggregations"] = aggsMap
-		for name, aggregate := range a.children {
+		for name, aggregate := range a.subAggregations {
 			src, err := aggregate.Source()
 			if err != nil {
 				return nil, err

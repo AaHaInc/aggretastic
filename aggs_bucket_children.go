@@ -17,7 +17,7 @@ func (a *ChildrenAggregation) Type(typ string) *ChildrenAggregation {
 }
 
 func (a *ChildrenAggregation) SubAggregation(name string, subAggregation Aggregation) *ChildrenAggregation {
-	a.aggregation.setChild(subAggregation, name)
+	a.setSubAggregation(subAggregation, name)
 	return a
 }
 
@@ -33,10 +33,10 @@ func (a *ChildrenAggregation) Source() (interface{}, error) {
 	opts["type"] = a.typ
 
 	// AggregationBuilder (SubAggregations)
-	if len(a.children) > 0 {
+	if len(a.subAggregations) > 0 {
 		aggsMap := make(map[string]interface{})
 		source["aggregations"] = aggsMap
-		for name, aggregate := range a.children {
+		for name, aggregate := range a.subAggregations {
 			src, err := aggregate.Source()
 			if err != nil {
 				return nil, err

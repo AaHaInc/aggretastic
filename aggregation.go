@@ -21,16 +21,16 @@ type Aggregation interface {
 	setParent(parent Aggregation)
 	getParent() Aggregation
 
-	setChild(child Aggregation, childName string)
-	getChild(childName string) Aggregation
-	removeChild(childName string)
-	getChildren() map[string]Aggregation
+	setSubAggregation(child Aggregation, childName string)
+	getSubAggregation(childName string) Aggregation
+	deleteSubAggregation(childName string)
+	getSubAggregations() map[string]Aggregation
 }
 
 type aggregation struct {
-	key      string
-	parent   Aggregation
-	children map[string]Aggregation
+	key             string
+	parent          Aggregation
+	subAggregations map[string]Aggregation
 }
 
 func (a *aggregation) Source() (interface{}, error) {
@@ -42,7 +42,7 @@ func (a *aggregation) Select(path ...string) Aggregation {
 		return nil
 	}
 
-	subAgg, ok := a.children[path[0]]
+	subAgg, ok := a.subAggregations[path[0]]
 	if !ok {
 		return nil
 	}
@@ -63,7 +63,7 @@ func (a *aggregation) Inject(subAggregation Aggregation, path ...string) error {
 		// injection means setting key, parent, child
 		subAggregation.setParent(a)
 		subAggregation.setKey(path[0])
-		a.setChild(subAggregation, path[0])
+		a.setSubAggregation(subAggregation, path[0])
 		return nil
 	}
 
@@ -91,11 +91,11 @@ func (a *aggregation) InjectX(subAggregation Aggregation, path ...string) error 
 
 func (a *aggregation) WrapBy(wrapper Aggregation, name string) {
 	parentKey := a.parent.getKey()
-	a.parent.setChild(wrapper, name)
-	this := a.parent.getChild(a.key) // get `a` object, but in proper type (not *aggregation, but *SomeAggregation)
+	a.parent.setSubAggregation(wrapper, name)
+	this := a.parent.getSubAggregation(a.key) // get `a` object, but in proper type (not *aggregation, but *SomeAggregation)
 	wrapper.setKey(a.key)
-	wrapper.setChild(this, a.key)
-	a.parent.removeChild(a.key)
+	wrapper.setSubAggregation(this, a.key)
+	a.parent.deleteSubAggregation(a.key)
 	a.parent = wrapper
 	a.parent.setKey(parentKey)
 }
@@ -117,19 +117,19 @@ func (a *aggregation) InjectWrapper(wrapper Aggregation, path ...string) error {
 	}
 
 	wrapperKey := path[n]
-	for childKey, child := range parent.getChildren() {
-		wrapper.setChild(child, childKey)
-		parent.removeChild(childKey)
+	for childKey, child := range parent.getSubAggregations() {
+		wrapper.setSubAggregation(child, childKey)
+		parent.deleteSubAggregation(childKey)
 	}
 
-	parent.setChild(wrapper, wrapperKey)
+	parent.setSubAggregation(wrapper, wrapperKey)
 	parent.setKey(wrapperKey)
 
 	return nil
 }
 
 func (a *aggregation) GetAllSubs() map[string]Aggregation {
-	return a.children
+	return a.subAggregations
 }
 
 // helper util functions
@@ -142,20 +142,20 @@ func (a *aggregation) getParent() Aggregation {
 	return a.parent
 }
 
-func (a *aggregation) setChild(child Aggregation, childName string) {
-	a.children[childName] = child
+func (a *aggregation) setSubAggregation(child Aggregation, childName string) {
+	a.subAggregations[childName] = child
 }
 
-func (a *aggregation) getChild(childName string) Aggregation {
-	return a.children[childName]
+func (a *aggregation) getSubAggregation(childName string) Aggregation {
+	return a.subAggregations[childName]
 }
 
-func (a *aggregation) getChildren() map[string]Aggregation {
-	return a.children
+func (a *aggregation) getSubAggregations() map[string]Aggregation {
+	return a.subAggregations
 }
 
-func (a *aggregation) removeChild(childName string) {
-	delete(a.children, childName)
+func (a *aggregation) deleteSubAggregation(childName string) {
+	delete(a.subAggregations, childName)
 }
 
 func (a *aggregation) setKey(key string) {
@@ -166,5 +166,5 @@ func (a *aggregation) getKey() string {
 }
 
 func nilAggregation() *aggregation {
-	return &aggregation{children: make(map[string]Aggregation)}
+	return &aggregation{subAggregations: make(map[string]Aggregation)}
 }

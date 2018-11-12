@@ -16,7 +16,7 @@ func NewFilterAggregation() *FilterAggregation {
 }
 
 func (a *FilterAggregation) SubAggregation(name string, subAggregation Aggregation) *FilterAggregation {
-	a.aggregation.setChild(subAggregation, name)
+	a.setSubAggregation(subAggregation, name)
 	return a
 }
 
@@ -38,10 +38,10 @@ func (a *FilterAggregation) Source() (interface{}, error) {
 	source := make(map[string]interface{})
 	source["filter"] = src
 
-	if len(a.children) > 0 {
+	if len(a.subAggregations) > 0 {
 		aggsMap := make(map[string]interface{})
 		source["aggregations"] = aggsMap
-		for name, aggregate := range a.children {
+		for name, aggregate := range a.subAggregations {
 			src, err := aggregate.Source()
 			if err != nil {
 				return nil, err
