@@ -101,3 +101,8 @@ func IsBucketScriptAggregation(agg Aggregation) (ok bool) {
 	_, ok = agg.(*BucketScriptAggregation)
 	return
 }
+
+func IsBucketSortAggregation(agg Aggregation) (ok bool) {
+	_, ok = agg.(*BucketSortAggregation)
+	return
+}
