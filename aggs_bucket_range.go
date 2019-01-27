@@ -13,7 +13,7 @@ import (
 // from value and excludes the to value for each range.
 // See: https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-bucket-range-aggregation.html
 type RangeAggregation struct {
-	*tree
+	*aggregation
 
 	field    string
 	script   *elastic.Script
@@ -34,7 +34,7 @@ func NewRangeAggregation() *RangeAggregation {
 	a := &RangeAggregation{
 		entries: make([]rangeAggregationEntry, 0),
 	}
-	a.tree = nilAggregationTree(a)
+	a.aggregation = nilAggregation()
 
 	return a
 }

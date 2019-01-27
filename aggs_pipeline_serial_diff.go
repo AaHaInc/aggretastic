@@ -7,7 +7,7 @@ package aggretastic
 // For more details, see
 // https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-pipeline-serialdiff-aggregation.html
 type SerialDiffAggregation struct {
-	*notInjectable
+	*finiteAggregation
 
 	format    string
 	gapPolicy string
@@ -22,7 +22,7 @@ func NewSerialDiffAggregation() *SerialDiffAggregation {
 	a := &SerialDiffAggregation{
 		bucketsPaths: make([]string, 0),
 	}
-	a.notInjectable = newNotInjectable(a)
+	a.finiteAggregation = newFiniteAggregation()
 
 	return a
 }

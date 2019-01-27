@@ -10,7 +10,7 @@ package aggretastic
 // See https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-metrics-stats-aggregation.html
 // for details.
 type MatrixStatsAggregation struct {
-	*tree
+	*aggregation
 
 	fields    []string
 	missing   interface{}
@@ -23,7 +23,7 @@ type MatrixStatsAggregation struct {
 // NewMatrixStatsAggregation initializes a new MatrixStatsAggregation.
 func NewMatrixStatsAggregation() *MatrixStatsAggregation {
 	a := &MatrixStatsAggregation{}
-	a.tree = nilAggregationTree(a)
+	a.aggregation = nilAggregation()
 
 	return a
 }

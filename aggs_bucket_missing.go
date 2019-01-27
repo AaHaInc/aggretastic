@@ -9,7 +9,7 @@ package aggretastic
 // in any of the other buckets due to missing field data values.
 // See: https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-bucket-missing-aggregation.html
 type MissingAggregation struct {
-	*tree
+	*aggregation
 
 	field string
 	meta  map[string]interface{}
@@ -17,7 +17,7 @@ type MissingAggregation struct {
 
 func NewMissingAggregation() *MissingAggregation {
 	a := &MissingAggregation{}
-	a.tree = nilAggregationTree(a)
+	a.aggregation = nilAggregation()
 
 	return a
 }

@@ -1,39 +1,23 @@
 package aggretastic
 
-// ReverseNestedAggregation defines a special single bucket aggregation
-// that enables aggregating on parent docs from nested documents.
-// Effectively this aggregation can break out of the nested block
-// structure and link to other nested structures or the root document,
-// which allows nesting other aggregations that aren’t part of
-// the nested object in a nested aggregation.
-//
-// See: https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-bucket-reverse-nested-aggregation.html
 type ReverseNestedAggregation struct {
-	*tree
+	*aggregation
 
 	path string
 	meta map[string]interface{}
 }
 
-// NewReverseNestedAggregation initializes a new ReverseNestedAggregation
-// bucket aggregation.
 func NewReverseNestedAggregation() *ReverseNestedAggregation {
-	a := &ReverseNestedAggregation{}
-	a.tree = nilAggregationTree(a)
-
-	return a
+	return &ReverseNestedAggregation{aggregation: nilAggregation()}
 }
 
-// Path set the path to use for this nested aggregation. The path must match
-// the path to a nested object in the mappings. If it is not specified
-// then this aggregation will go back to the root document.
 func (a *ReverseNestedAggregation) Path(path string) *ReverseNestedAggregation {
 	a.path = path
 	return a
 }
 
 func (a *ReverseNestedAggregation) SubAggregation(name string, subAggregation Aggregation) *ReverseNestedAggregation {
-	a.subAggregations[name] = subAggregation
+	a.setSubAggregation(subAggregation, name)
 	return a
 }
 
@@ -44,16 +28,6 @@ func (a *ReverseNestedAggregation) Meta(metaData map[string]interface{}) *Revers
 }
 
 func (a *ReverseNestedAggregation) Source() (interface{}, error) {
-	// Example:
-	//	{
-	//    "aggs" : {
-	//      "reverse_nested" : {
-	//        "path": "..."
-	//      }
-	//    }
-	//	}
-	// This method returns only the { "reverse_nested" : {} } part.
-
 	source := make(map[string]interface{})
 	opts := make(map[string]interface{})
 	source["reverse_nested"] = opts

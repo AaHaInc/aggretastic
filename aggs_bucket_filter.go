@@ -1,32 +1,25 @@
 package aggretastic
 
-import "github.com/olivere/elastic"
+import (
+	"github.com/olivere/elastic"
+)
 
-// FilterAggregation defines a single bucket of all the documents
-// in the current document set context that match a specified filter.
-// Often this will be used to narrow down the current aggregation context
-// to a specific set of documents.
-// See: https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-bucket-filter-aggregation.html
 type FilterAggregation struct {
-	*tree
+	*aggregation
 
 	filter elastic.Query
 	meta   map[string]interface{}
 }
 
 func NewFilterAggregation() *FilterAggregation {
-	a := &FilterAggregation{}
-	a.tree = nilAggregationTree(a)
-
-	return a
+	return &FilterAggregation{aggregation: nilAggregation()}
 }
 
 func (a *FilterAggregation) SubAggregation(name string, subAggregation Aggregation) *FilterAggregation {
-	a.subAggregations[name] = subAggregation
+	a.setSubAggregation(subAggregation, name)
 	return a
 }
 
-// Meta sets the meta data to be included in the aggregation response.
 func (a *FilterAggregation) Meta(metaData map[string]interface{}) *FilterAggregation {
 	a.meta = metaData
 	return a
@@ -38,16 +31,6 @@ func (a *FilterAggregation) Filter(filter elastic.Query) *FilterAggregation {
 }
 
 func (a *FilterAggregation) Source() (interface{}, error) {
-	// Example:
-	//	{
-	//    "aggs" : {
-	//         "in_stock_products" : {
-	//             "filter" : { "range" : { "stock" : { "gt" : 0 } } }
-	//         }
-	//    }
-	//	}
-	// This method returns only the { "filter" : {} } part.
-
 	src, err := a.filter.Source()
 	if err != nil {
 		return nil, err
@@ -55,7 +38,6 @@ func (a *FilterAggregation) Source() (interface{}, error) {
 	source := make(map[string]interface{})
 	source["filter"] = src
 
-	// AggregationBuilder (SubAggregations)
 	if len(a.subAggregations) > 0 {
 		aggsMap := make(map[string]interface{})
 		source["aggregations"] = aggsMap

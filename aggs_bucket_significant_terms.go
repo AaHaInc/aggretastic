@@ -6,7 +6,7 @@ import "github.com/olivere/elastic"
 // or unusual occurrences of terms in a set.
 // See: https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-bucket-significantterms-aggregation.html
 type SignificantTermsAggregation struct {
-	*tree
+	*aggregation
 
 	field string
 	meta  map[string]interface{}
@@ -22,7 +22,7 @@ type SignificantTermsAggregation struct {
 
 func NewSignificantTermsAggregation() *SignificantTermsAggregation {
 	a := &SignificantTermsAggregation{}
-	a.tree = nilAggregationTree(a)
+	a.aggregation = nilAggregation()
 
 	return a
 }

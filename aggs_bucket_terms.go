@@ -7,7 +7,7 @@ import "github.com/olivere/elastic"
 //
 // See: http://www.elasticsearch.org/guide/en/elasticsearch/reference/6.2/search-aggregations-bucket-terms-aggregation.html
 type TermsAggregation struct {
-	*tree
+	*aggregation
 
 	field   string
 	script  *elastic.Script
@@ -29,7 +29,7 @@ type TermsAggregation struct {
 
 func NewTermsAggregation() *TermsAggregation {
 	a := &TermsAggregation{}
-	a.tree = nilAggregationTree(a)
+	a.aggregation = nilAggregation()
 
 	return a
 }

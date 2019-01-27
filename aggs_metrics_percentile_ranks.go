@@ -5,7 +5,7 @@ import "github.com/olivere/elastic"
 // PercentileRanksAggregation
 // See: https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-metrics-percentile-rank-aggregation.html
 type PercentileRanksAggregation struct {
-	*tree
+	*aggregation
 
 	field       string
 	script      *elastic.Script
@@ -18,7 +18,7 @@ type PercentileRanksAggregation struct {
 
 func NewPercentileRanksAggregation() *PercentileRanksAggregation {
 	a := &PercentileRanksAggregation{values: make([]float64, 0)}
-	a.tree = nilAggregationTree(a)
+	a.aggregation = nilAggregation()
 
 	return a
 }

@@ -6,7 +6,7 @@ import "github.com/olivere/elastic"
 // bounding box containing all geo_point values for a field.
 // See: https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-metrics-geobounds-aggregation.html
 type GeoBoundsAggregation struct {
-	*tree
+	*aggregation
 
 	field         string
 	script        *elastic.Script
@@ -16,7 +16,7 @@ type GeoBoundsAggregation struct {
 
 func NewGeoBoundsAggregation() *GeoBoundsAggregation {
 	a := &GeoBoundsAggregation{}
-	a.tree = nilAggregationTree(a)
+	a.aggregation = nilAggregation()
 
 	return a
 }

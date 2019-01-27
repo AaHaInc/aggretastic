@@ -6,7 +6,7 @@ import "github.com/olivere/elastic"
 // from all coordinate values for a Geo-point datatype field.
 // See: https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-metrics-geocentroid-aggregation.html
 type GeoCentroidAggregation struct {
-	*tree
+	*aggregation
 
 	field  string
 	script *elastic.Script
@@ -15,7 +15,7 @@ type GeoCentroidAggregation struct {
 
 func NewGeoCentroidAggregation() *GeoCentroidAggregation {
 	a := &GeoCentroidAggregation{}
-	a.tree = nilAggregationTree(a)
+	a.aggregation = nilAggregation()
 
 	return a
 }

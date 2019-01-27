@@ -1,28 +1,21 @@
 package aggretastic
 
-// NestedAggregation is a special single bucket aggregation that enables
-// aggregating nested documents.
-// See: https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-bucket-nested-aggregation.html
 type NestedAggregation struct {
-	*tree
+	*aggregation
 
 	path string
 	meta map[string]interface{}
 }
 
 func NewNestedAggregation() *NestedAggregation {
-	a := &NestedAggregation{}
-	a.tree = nilAggregationTree(a)
-
-	return a
+	return &NestedAggregation{aggregation: nilAggregation()}
 }
 
 func (a *NestedAggregation) SubAggregation(name string, subAggregation Aggregation) *NestedAggregation {
-	a.subAggregations[name] = subAggregation
+	a.setSubAggregation(subAggregation, name)
 	return a
 }
 
-// Meta sets the meta data to be included in the aggregation response.
 func (a *NestedAggregation) Meta(metaData map[string]interface{}) *NestedAggregation {
 	a.meta = metaData
 	return a
@@ -34,24 +27,6 @@ func (a *NestedAggregation) Path(path string) *NestedAggregation {
 }
 
 func (a *NestedAggregation) Source() (interface{}, error) {
-	// Example:
-	//	{
-	//     "query" : {
-	//         "match" : { "name" : "led tv" }
-	//     }
-	//     "aggs" : {
-	//         "resellers" : {
-	//             "nested" : {
-	//                 "path" : "resellers"
-	//             },
-	//             "aggs" : {
-	//                 "min_price" : { "min" : { "field" : "resellers.price" } }
-	//             }
-	//         }
-	//     }
-	//	}
-	// This method returns only the { "nested" : {} } part.
-
 	source := make(map[string]interface{})
 	opts := make(map[string]interface{})
 	source["nested"] = opts

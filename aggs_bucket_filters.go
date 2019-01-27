@@ -16,7 +16,7 @@ import (
 // For details, see
 // https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-bucket-filters-aggregation.html
 type FiltersAggregation struct {
-	*tree
+	*aggregation
 
 	unnamedFilters []elastic.Query
 	namedFilters   map[string]elastic.Query
@@ -29,7 +29,7 @@ func NewFiltersAggregation() *FiltersAggregation {
 		unnamedFilters: make([]elastic.Query, 0),
 		namedFilters:   make(map[string]elastic.Query),
 	}
-	a.tree = nilAggregationTree(a)
+	a.aggregation = nilAggregation()
 
 	return a
 }

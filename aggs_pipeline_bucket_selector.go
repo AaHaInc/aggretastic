@@ -12,7 +12,7 @@ import "github.com/olivere/elastic"
 // For more details, see
 // https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-pipeline-bucket-selector-aggregation.html
 type BucketSelectorAggregation struct {
-	*notInjectable
+	*finiteAggregation
 
 	format    string
 	gapPolicy string
@@ -25,7 +25,7 @@ type BucketSelectorAggregation struct {
 // NewBucketSelectorAggregation creates and initializes a new BucketSelectorAggregation.
 func NewBucketSelectorAggregation() *BucketSelectorAggregation {
 	a := &BucketSelectorAggregation{}
-	a.notInjectable = newNotInjectable(a)
+	a.finiteAggregation = newFiniteAggregation()
 
 	return a
 }

@@ -5,16 +5,8 @@ import (
 	"time"
 )
 
-// DateRangeAggregation is a range aggregation that is dedicated for
-// date values. The main difference between this aggregation and the
-// normal range aggregation is that the from and to values can be expressed
-// in Date Math expressions, and it is also possible to specify a
-// date format by which the from and to response fields will be returned.
-// Note that this aggregration includes the from value and excludes the to
-// value for each range.
-// See: https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-bucket-daterange-aggregation.html
 type DateRangeAggregation struct {
-	*tree
+	*aggregation
 
 	field    string
 	script   *elastic.Script
@@ -34,7 +26,7 @@ type DateRangeAggregationEntry struct {
 
 func NewDateRangeAggregation() *DateRangeAggregation {
 	a := &DateRangeAggregation{entries: make([]DateRangeAggregationEntry, 0)}
-	a.tree = nilAggregationTree(a)
+	a.aggregation = nilAggregation()
 
 	return a
 }

@@ -13,7 +13,7 @@ import "github.com/olivere/elastic"
 // For more details, see
 // https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-pipeline-bucket-script-aggregation.html
 type BucketScriptAggregation struct {
-	*notInjectable
+	*finiteAggregation
 
 	format    string
 	gapPolicy string
@@ -26,7 +26,7 @@ type BucketScriptAggregation struct {
 // NewBucketScriptAggregation creates and initializes a new BucketScriptAggregation.
 func NewBucketScriptAggregation() *BucketScriptAggregation {
 	a := &BucketScriptAggregation{}
-	a.notInjectable = newNotInjectable(a)
+	a.finiteAggregation = newFiniteAggregation()
 
 	return a
 }

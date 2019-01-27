@@ -2,13 +2,8 @@ package aggretastic
 
 import "github.com/olivere/elastic"
 
-// DiversifiedSamplerAggregation Like the ‘sampler` aggregation this is a filtering aggregation used to limit any
-// sub aggregations’ processing to a sample of the top-scoring documents. The diversified_sampler aggregation adds
-// the ability to limit the number of matches that share a common value such as an "author".
-//
-// See: https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-bucket-diversified-sampler-aggregation.html
 type DiversifiedSamplerAggregation struct {
-	*tree
+	*aggregation
 
 	meta            map[string]interface{}
 	field           string
@@ -23,7 +18,7 @@ func NewDiversifiedSamplerAggregation() *DiversifiedSamplerAggregation {
 		shardSize:       -1,
 		maxDocsPerValue: -1,
 	}
-	a.tree = nilAggregationTree(a)
+	a.aggregation = nilAggregation()
 
 	return a
 }
@@ -67,20 +62,6 @@ func (a *DiversifiedSamplerAggregation) ExecutionHint(hint string) *DiversifiedS
 }
 
 func (a *DiversifiedSamplerAggregation) Source() (interface{}, error) {
-	// Example:
-	// {
-	//     "aggs": {
-	//			"my_unbiased_sample": {
-	//				"diversified_sampler": {
-	//					"shard_size": 200,
-	//					"field" : "author"
-	//				}
-	//			}
-	//		}
-	// }
-	//
-	// This method returns only the { "diversified_sampler" : { ... } } part.
-
 	source := make(map[string]interface{})
 	opts := make(map[string]interface{})
 	source["diversified_sampler"] = opts

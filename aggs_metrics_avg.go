@@ -10,7 +10,7 @@ import "github.com/olivere/elastic"
 //
 // See: https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-metrics-avg-aggregation.html
 type AvgAggregation struct {
-	*tree
+	*aggregation
 
 	field  string
 	script *elastic.Script
@@ -20,7 +20,7 @@ type AvgAggregation struct {
 
 func NewAvgAggregation() *AvgAggregation {
 	a := &AvgAggregation{}
-	a.tree = nilAggregationTree(a)
+	a.aggregation = nilAggregation()
 
 	return a
 }

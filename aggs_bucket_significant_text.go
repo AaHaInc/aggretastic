@@ -2,11 +2,8 @@ package aggretastic
 
 import "github.com/olivere/elastic"
 
-// SignificantTextAggregation returns interesting or unusual occurrences
-// of free-text terms in a set.
-// See: https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-bucket-significanttext-aggregation.html
 type SignificantTextAggregation struct {
-	*tree
+	*aggregation
 
 	field string
 	meta  map[string]interface{}
@@ -15,13 +12,13 @@ type SignificantTextAggregation struct {
 	filterDuplicateText   *bool
 	includeExclude        *TermsAggregationIncludeExclude
 	filter                elastic.Query
-	bucketCountThresholds *BucketCountThresholds
+	bucketCountThresholds *elastic.BucketCountThresholds
 	significanceHeuristic SignificanceHeuristic
 }
 
 func NewSignificantTextAggregation() *SignificantTextAggregation {
 	a := &SignificantTextAggregation{}
-	a.tree = nilAggregationTree(a)
+	a.aggregation = nilAggregation()
 
 	return a
 }
@@ -54,7 +51,7 @@ func (a *SignificantTextAggregation) FilterDuplicateText(filter bool) *Significa
 
 func (a *SignificantTextAggregation) MinDocCount(minDocCount int64) *SignificantTextAggregation {
 	if a.bucketCountThresholds == nil {
-		a.bucketCountThresholds = &BucketCountThresholds{}
+		a.bucketCountThresholds = &elastic.BucketCountThresholds{}
 	}
 	a.bucketCountThresholds.MinDocCount = &minDocCount
 	return a
@@ -62,7 +59,7 @@ func (a *SignificantTextAggregation) MinDocCount(minDocCount int64) *Significant
 
 func (a *SignificantTextAggregation) ShardMinDocCount(shardMinDocCount int64) *SignificantTextAggregation {
 	if a.bucketCountThresholds == nil {
-		a.bucketCountThresholds = &BucketCountThresholds{}
+		a.bucketCountThresholds = &elastic.BucketCountThresholds{}
 	}
 	a.bucketCountThresholds.ShardMinDocCount = &shardMinDocCount
 	return a
@@ -70,7 +67,7 @@ func (a *SignificantTextAggregation) ShardMinDocCount(shardMinDocCount int64) *S
 
 func (a *SignificantTextAggregation) Size(size int) *SignificantTextAggregation {
 	if a.bucketCountThresholds == nil {
-		a.bucketCountThresholds = &BucketCountThresholds{}
+		a.bucketCountThresholds = &elastic.BucketCountThresholds{}
 	}
 	a.bucketCountThresholds.RequiredSize = &size
 	return a
@@ -78,7 +75,7 @@ func (a *SignificantTextAggregation) Size(size int) *SignificantTextAggregation 
 
 func (a *SignificantTextAggregation) ShardSize(shardSize int) *SignificantTextAggregation {
 	if a.bucketCountThresholds == nil {
-		a.bucketCountThresholds = &BucketCountThresholds{}
+		a.bucketCountThresholds = &elastic.BucketCountThresholds{}
 	}
 	a.bucketCountThresholds.ShardSize = &shardSize
 	return a

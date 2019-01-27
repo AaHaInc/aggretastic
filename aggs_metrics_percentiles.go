@@ -10,7 +10,7 @@ import "github.com/olivere/elastic"
 //
 // See: https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-metrics-percentile-aggregation.html
 type PercentilesAggregation struct {
-	*tree
+	*aggregation
 
 	field       string
 	script      *elastic.Script
@@ -23,7 +23,7 @@ type PercentilesAggregation struct {
 
 func NewPercentilesAggregation() *PercentilesAggregation {
 	a := &PercentilesAggregation{percentiles: make([]float64, 0)}
-	a.tree = nilAggregationTree(a)
+	a.aggregation = nilAggregation()
 
 	return a
 }

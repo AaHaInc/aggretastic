@@ -8,7 +8,7 @@ package aggretastic
 // For more details, see
 // https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-pipeline-percentiles-bucket-aggregation.html
 type PercentilesBucketAggregation struct {
-	*notInjectable
+	*finiteAggregation
 
 	format       string
 	gapPolicy    string
@@ -21,7 +21,7 @@ type PercentilesBucketAggregation struct {
 // NewPercentilesBucketAggregation creates and initializes a new PercentilesBucketAggregation.
 func NewPercentilesBucketAggregation() *PercentilesBucketAggregation {
 	a := &PercentilesBucketAggregation{}
-	a.notInjectable = newNotInjectable(a)
+	a.finiteAggregation = newFiniteAggregation()
 
 	return a
 }

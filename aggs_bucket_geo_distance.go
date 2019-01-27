@@ -9,7 +9,7 @@ package aggretastic
 // document and the origin falls within the distance range of the bucket).
 // See: https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-bucket-geodistance-aggregation.html
 type GeoDistanceAggregation struct {
-	*tree
+	*aggregation
 
 	field        string
 	unit         string
@@ -29,7 +29,7 @@ func NewGeoDistanceAggregation() *GeoDistanceAggregation {
 	a := &GeoDistanceAggregation{
 		ranges: make([]geoDistAggRange, 0),
 	}
-	a.tree = nilAggregationTree(a)
+	a.aggregation = nilAggregation()
 
 	return a
 }

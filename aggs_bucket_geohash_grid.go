@@ -1,7 +1,7 @@
 package aggretastic
 
 type GeoHashGridAggregation struct {
-	*tree
+	*aggregation
 
 	field     string
 	precision interface{}
@@ -15,7 +15,7 @@ func NewGeoHashGridAggregation() *GeoHashGridAggregation {
 		size:      -1,
 		shardSize: -1,
 	}
-	a.tree = nilAggregationTree(a)
+	a.aggregation = nilAggregation()
 
 	return a
 }

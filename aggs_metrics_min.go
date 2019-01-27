@@ -9,7 +9,7 @@ import "github.com/olivere/elastic"
 // provided script.
 // See: https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-metrics-min-aggregation.html
 type MinAggregation struct {
-	*tree
+	*aggregation
 
 	field  string
 	script *elastic.Script
@@ -19,7 +19,7 @@ type MinAggregation struct {
 
 func NewMinAggregation() *MinAggregation {
 	a := &MinAggregation{}
-	a.tree = nilAggregationTree(a)
+	a.aggregation = nilAggregation()
 
 	return a
 }

@@ -8,7 +8,7 @@ package aggretastic
 // For more details, see
 // https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-pipeline-cumulative-sum-aggregation.html
 type CumulativeSumAggregation struct {
-	*notInjectable
+	*finiteAggregation
 
 	format string
 
@@ -21,7 +21,7 @@ func NewCumulativeSumAggregation() *CumulativeSumAggregation {
 	a := &CumulativeSumAggregation{
 		bucketsPaths: make([]string, 0),
 	}
-	a.notInjectable = newNotInjectable(a)
+	a.finiteAggregation = newFiniteAggregation()
 
 	return a
 }

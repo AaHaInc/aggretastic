@@ -11,7 +11,7 @@ import "github.com/olivere/elastic"
 // number of values the average is computed over.
 // See: https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-metrics-valuecount-aggregation.html
 type ValueCountAggregation struct {
-	*tree
+	*aggregation
 
 	field  string
 	script *elastic.Script
@@ -21,7 +21,7 @@ type ValueCountAggregation struct {
 
 func NewValueCountAggregation() *ValueCountAggregation {
 	a := &ValueCountAggregation{}
-	a.tree = nilAggregationTree(a)
+	a.aggregation = nilAggregation()
 
 	return a
 }

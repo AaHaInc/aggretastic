@@ -8,7 +8,7 @@ import "github.com/olivere/elastic"
 // values.
 // See: https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-bucket-histogram-aggregation.html
 type HistogramAggregation struct {
-	*tree
+	*aggregation
 
 	field   string
 	script  *elastic.Script
@@ -26,7 +26,7 @@ type HistogramAggregation struct {
 
 func NewHistogramAggregation() *HistogramAggregation {
 	a := &HistogramAggregation{}
-	a.tree = nilAggregationTree(a)
+	a.aggregation = nilAggregation()
 
 	return a
 }
