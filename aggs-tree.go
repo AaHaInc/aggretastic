@@ -23,10 +23,10 @@ type Aggregation interface {
 	GetAllSubs() map[string]Aggregation
 
 	// Inject sets new subAgg into the map of subAggregations
-	Inject(subAgg elastic.Aggregation, path ...string) error
+	Inject(subAgg Aggregation, path ...string) error
 
 	// InjectX sets new subAgg into the map of subAggregations only if it NOT exists already
-	InjectX(subAgg elastic.Aggregation, path ...string) error
+	InjectX(subAgg Aggregation, path ...string) error
 
 	// Select returns any subAgg by it's path
 	Select(path ...string) Aggregation
@@ -44,17 +44,17 @@ func IsNilTree(t Aggregation) bool {
 
 type tree struct {
 	root            elastic.Aggregation
-	subAggregations map[string]elastic.Aggregation
+	subAggregations map[string]Aggregation
 }
 
 func nilAggregationTree(root elastic.Aggregation) *tree {
 	return &tree{
 		root:            root,
-		subAggregations: make(map[string]elastic.Aggregation),
+		subAggregations: make(map[string]Aggregation),
 	}
 }
 
-func (a *tree) Inject(subAggregation elastic.Aggregation, path ...string) error {
+func (a *tree) Inject(subAggregation Aggregation, path ...string) error {
 	if len(path) == 0 {
 		return ErrNoPath
 	}
@@ -73,7 +73,7 @@ func (a *tree) Inject(subAggregation elastic.Aggregation, path ...string) error 
 	return cursor.Inject(subAggregation, path[len(path)-1])
 }
 
-func (a *tree) InjectX(subAggregation elastic.Aggregation, path ...string) error {
+func (a *tree) InjectX(subAggregation Aggregation, path ...string) error {
 	if len(path) == 0 {
 		return ErrNoPath
 	}
@@ -86,13 +86,7 @@ func (a *tree) InjectX(subAggregation elastic.Aggregation, path ...string) error
 }
 
 func (a *tree) GetAllSubs() map[string]Aggregation {
-	result := make(map[string]Aggregation)
-
-	for k, v := range a.subAggregations {
-		result[k] = v.(Aggregation)
-	}
-
-	return result
+	return a.subAggregations
 }
 
 func (a *tree) Select(path ...string) Aggregation {
@@ -106,10 +100,10 @@ func (a *tree) Select(path ...string) Aggregation {
 	}
 
 	if len(path) == 1 {
-		return subAgg.(Aggregation)
+		return subAgg
 	}
 
-	return subAgg.(Aggregation).Select(path[1:]...)
+	return subAgg.Select(path[1:]...)
 }
 
 func (a *tree) Pop(path ...string) Aggregation {
@@ -124,10 +118,10 @@ func (a *tree) Pop(path ...string) Aggregation {
 
 	if len(path) == 1 {
 		delete(a.subAggregations, path[0])
-		return subAgg.(Aggregation)
+		return subAgg
 	}
 
-	return subAgg.(Aggregation).Pop(path[1:]...)
+	return subAgg.Pop(path[1:]...)
 }
 
 func (a *tree) Export() elastic.Aggregation {
@@ -190,7 +184,7 @@ func (a *Aggregations) Pop(path ...string) Aggregation {
 }
 
 // Inject just puts agg into the map of aggregations
-func (a *Aggregations) Inject(subAgg elastic.Aggregation, path ...string) error {
+func (a *Aggregations) Inject(subAgg Aggregation, path ...string) error {
 	if a == nil {
 		return ErrAggIsNotInjectable
 	}
@@ -202,7 +196,7 @@ func (a *Aggregations) Inject(subAgg elastic.Aggregation, path ...string) error 
 	name := path[0]
 
 	if len(path) == 1 {
-		(*a)[name] = subAgg.(Aggregation)
+		(*a)[name] = subAgg
 		return nil
 	}
 
@@ -214,7 +208,7 @@ func (a *Aggregations) Inject(subAgg elastic.Aggregation, path ...string) error 
 	return (*a)[name].Inject(subAgg, path...)
 }
 
-func (a *Aggregations) InjectX(subAgg elastic.Aggregation, path ...string) error {
+func (a *Aggregations) InjectX(subAgg Aggregation, path ...string) error {
 	if a == nil {
 		return ErrAggIsNotInjectable
 	}
@@ -227,7 +221,7 @@ func (a *Aggregations) InjectX(subAgg elastic.Aggregation, path ...string) error
 
 	if len(path) == 1 {
 		if _, ok := (*a)[name]; !ok {
-			(*a)[name] = subAgg.(Aggregation)
+			(*a)[name] = subAgg
 		}
 
 		return nil

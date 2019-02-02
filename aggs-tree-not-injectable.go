@@ -18,11 +18,11 @@ func IsNotInjectable(agg Aggregation) bool {
 	return ok
 }
 
-func (a *notInjectable) Inject(subAggregation elastic.Aggregation, path ...string) error {
+func (a *notInjectable) Inject(subAggregation Aggregation, path ...string) error {
 	return ErrAggIsNotInjectable
 }
 
-func (a *notInjectable) InjectX(subAggregation elastic.Aggregation, path ...string) error {
+func (a *notInjectable) InjectX(subAggregation Aggregation, path ...string) error {
 	return ErrAggIsNotInjectable
 }
 
