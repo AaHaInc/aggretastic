@@ -9,8 +9,6 @@ type notInjectable struct {
 	root elastic.Aggregation
 }
 
-var errNotInjectable = fmt.Errorf("not injectable")
-
 func newNotInjectable(root elastic.Aggregation) *notInjectable {
 	return &notInjectable{root: root}
 }
@@ -21,11 +19,11 @@ func IsNotInjectable(agg Aggregation) bool {
 }
 
 func (a *notInjectable) Inject(subAggregation elastic.Aggregation, path ...string) error {
-	return errNotInjectable
+	return ErrAggIsNotInjectable
 }
 
 func (a *notInjectable) InjectX(subAggregation elastic.Aggregation, path ...string) error {
-	return errNotInjectable
+	return ErrAggIsNotInjectable
 }
 
 func (a *notInjectable) GetAllSubs() map[string]Aggregation {

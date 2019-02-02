@@ -5,6 +5,12 @@ import (
 	"github.com/olivere/elastic"
 )
 
+var (
+	ErrNoPath             = fmt.Errorf("no path")
+	ErrPathNotSelectable  = fmt.Errorf("path is not selectable")
+	ErrAggIsNotInjectable = fmt.Errorf("agg is not injectable")
+)
+
 // Aggregation is a tree-ish version of original elastic.Aggregation
 // Besides just attaching subAggregations it can get any of children subAggregations
 // and add another subAggregation to it
@@ -50,7 +56,7 @@ func nilAggregationTree(root elastic.Aggregation) *tree {
 
 func (a *tree) Inject(subAggregation elastic.Aggregation, path ...string) error {
 	if len(path) == 0 {
-		return fmt.Errorf("no path")
+		return ErrNoPath
 	}
 
 	if len(path) == 1 {
@@ -61,7 +67,7 @@ func (a *tree) Inject(subAggregation elastic.Aggregation, path ...string) error 
 	// deeper inject
 	cursor := a.Select(path[:len(path)-1]...)
 	if IsNilTree(cursor) {
-		return fmt.Errorf("path not selectable")
+		return ErrPathNotSelectable
 	}
 
 	return cursor.Inject(subAggregation, path[len(path)-1])
@@ -69,7 +75,7 @@ func (a *tree) Inject(subAggregation elastic.Aggregation, path ...string) error 
 
 func (a *tree) InjectX(subAggregation elastic.Aggregation, path ...string) error {
 	if len(path) == 0 {
-		return fmt.Errorf("no path")
+		return ErrNoPath
 	}
 
 	if alreadyInjected := a.Select(path...); IsNilTree(alreadyInjected) {
@@ -186,11 +192,11 @@ func (a *Aggregations) Pop(path ...string) Aggregation {
 // Inject just puts agg into the map of aggregations
 func (a *Aggregations) Inject(subAgg elastic.Aggregation, path ...string) error {
 	if a == nil {
-		return fmt.Errorf("not injectable")
+		return ErrAggIsNotInjectable
 	}
 
 	if len(path) == 0 {
-		return fmt.Errorf("no path")
+		return ErrNoPath
 	}
 
 	name := path[0]
@@ -202,7 +208,7 @@ func (a *Aggregations) Inject(subAgg elastic.Aggregation, path ...string) error 
 
 	path = path[1:]
 	if _, ok := (*a)[name]; !ok {
-		return fmt.Errorf("not injectable")
+		return ErrAggIsNotInjectable
 	}
 
 	return (*a)[name].Inject(subAgg, path...)
@@ -210,11 +216,11 @@ func (a *Aggregations) Inject(subAgg elastic.Aggregation, path ...string) error 
 
 func (a *Aggregations) InjectX(subAgg elastic.Aggregation, path ...string) error {
 	if a == nil {
-		return fmt.Errorf("not injectable")
+		return ErrAggIsNotInjectable
 	}
 
 	if len(path) == 0 {
-		return fmt.Errorf("no path")
+		return ErrNoPath
 	}
 
 	name := path[0]
@@ -229,7 +235,7 @@ func (a *Aggregations) InjectX(subAgg elastic.Aggregation, path ...string) error
 
 	path = path[1:]
 	if _, ok := (*a)[name]; !ok {
-		return fmt.Errorf("not injectable")
+		return ErrAggIsNotInjectable
 	}
 
 	return (*a)[name].InjectX(subAgg, path...)
