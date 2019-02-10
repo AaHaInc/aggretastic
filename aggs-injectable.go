@@ -1,60 +1,37 @@
 package aggretastic
 
 import (
-	"fmt"
 	"github.com/olivere/elastic"
 )
 
-var (
-	ErrNoPath             = fmt.Errorf("no path")
-	ErrPathNotSelectable  = fmt.Errorf("path is not selectable")
-	ErrAggIsNotInjectable = fmt.Errorf("agg is not injectable")
-)
-
-// Aggregation is a tree-ish version of original elastic.Aggregation
-// Besides just attaching subAggregations it can get any of children subAggregations
+// Injectable represents elastic.Aggregation which can
+// get any of children subAggregations
 // and add another subAggregation to it
-type Aggregation interface {
-	// embedding original elastic.Aggregation interface
-	// is used to support call of `.Source()` method from aggregations' code
-	elastic.Aggregation
-
-	// GetAllSubs returns the map of this aggregation's subAggregations
-	GetAllSubs() map[string]Aggregation
-
-	// Inject sets new subAgg into the map of subAggregations
-	Inject(subAgg Aggregation, path ...string) error
-
-	// InjectX sets new subAgg into the map of subAggregations only if it NOT exists already
-	InjectX(subAgg Aggregation, path ...string) error
-
-	// Select returns any subAgg by it's path
-	Select(path ...string) Aggregation
-
-	// Pop returns a subAgg by it's path and remove it from tree
-	Pop(path ...string) Aggregation
-
-	// Export returns the same object in original Agg interface
-	Export() elastic.Aggregation
-}
-
-func IsNilTree(t Aggregation) bool {
-	return t == nil || t.Export() == nil
-}
-
-type tree struct {
+type Injectable struct {
 	root            elastic.Aggregation
 	subAggregations map[string]Aggregation
 }
 
-func nilAggregationTree(root elastic.Aggregation) *tree {
-	return &tree{
+// Creates new Injectable Aggregation
+func newInjectable(root elastic.Aggregation) *Injectable {
+	return &Injectable{
 		root:            root,
 		subAggregations: make(map[string]Aggregation),
 	}
 }
 
-func (a *tree) Inject(subAggregation Aggregation, path ...string) error {
+// Checks if Aggregation is Injectable
+func IsInjectable(t Aggregation) bool {
+	return t == nil || t.Export() == nil
+}
+
+// Deprecated function. Keep for back-compatibility
+func IsNilTree(t Aggregation) bool {
+	return IsInjectable(t)
+}
+
+// Inject sets new subAgg into the map of subAggregations
+func (a *Injectable) Inject(subAggregation Aggregation, path ...string) error {
 	if len(path) == 0 {
 		return ErrNoPath
 	}
@@ -66,30 +43,33 @@ func (a *tree) Inject(subAggregation Aggregation, path ...string) error {
 
 	// deeper inject
 	cursor := a.Select(path[:len(path)-1]...)
-	if IsNilTree(cursor) {
+	if IsInjectable(cursor) {
 		return ErrPathNotSelectable
 	}
 
 	return cursor.Inject(subAggregation, path[len(path)-1])
 }
 
-func (a *tree) InjectX(subAggregation Aggregation, path ...string) error {
+// InjectX sets new subAgg into the map of subAggregations only if it NOT exists already
+func (a *Injectable) InjectX(subAggregation Aggregation, path ...string) error {
 	if len(path) == 0 {
 		return ErrNoPath
 	}
 
-	if alreadyInjected := a.Select(path...); IsNilTree(alreadyInjected) {
+	if alreadyInjected := a.Select(path...); IsInjectable(alreadyInjected) {
 		return a.Inject(subAggregation, path...)
 	}
 
 	return nil
 }
 
-func (a *tree) GetAllSubs() map[string]Aggregation {
+// GetAllSubs returns the map of this aggregation's subAggregations
+func (a *Injectable) GetAllSubs() map[string]Aggregation {
 	return a.subAggregations
 }
 
-func (a *tree) Select(path ...string) Aggregation {
+// Select returns any subAgg by it's path
+func (a *Injectable) Select(path ...string) Aggregation {
 	if len(path) == 0 {
 		return nil
 	}
@@ -106,7 +86,8 @@ func (a *tree) Select(path ...string) Aggregation {
 	return subAgg.Select(path[1:]...)
 }
 
-func (a *tree) Pop(path ...string) Aggregation {
+// Pop returns a subAgg by it's path and remove it from Injectable
+func (a *Injectable) Pop(path ...string) Aggregation {
 	if len(path) == 0 {
 		return nil
 	}
@@ -124,7 +105,8 @@ func (a *tree) Pop(path ...string) Aggregation {
 	return subAgg.Pop(path[1:]...)
 }
 
-func (a *tree) Export() elastic.Aggregation {
+// Export returns the same object in original Agg interface
+func (a *Injectable) Export() elastic.Aggregation {
 	return a.root
 }
 
@@ -208,6 +190,7 @@ func (a *Aggregations) Inject(subAgg Aggregation, path ...string) error {
 	return (*a)[name].Inject(subAgg, path...)
 }
 
+// Inject just puts agg into the map of aggregations only if it NOT exists already
 func (a *Aggregations) InjectX(subAgg Aggregation, path ...string) error {
 	if a == nil {
 		return ErrAggIsNotInjectable
