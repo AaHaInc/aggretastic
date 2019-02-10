@@ -1,19 +1,21 @@
+// Copyright 2012-present Oliver Eilhard. All rights reserved.
+// Use of this source code is governed by a MIT-license.
+// See http://olivere.mit-license.org/license.txt for details.
+
 package aggretastic
 
 // NestedAggregation is a special single bucket aggregation that enables
 // aggregating nested documents.
 // See: https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-bucket-nested-aggregation.html
 type NestedAggregation struct {
-	*tree
-
-	path string
-	meta map[string]interface{}
+	path		string
+	meta		map[string]interface{}
+	*Injectable
 }
 
 func NewNestedAggregation() *NestedAggregation {
 	a := &NestedAggregation{}
-	a.tree = nilAggregationTree(a)
-
+	a.Injectable = newInjectable(a)
 	return a
 }
 

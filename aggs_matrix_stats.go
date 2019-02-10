@@ -1,3 +1,7 @@
+// Copyright 2012-present Oliver Eilhard. All rights reserved.
+// Use of this source code is governed by a MIT-license.
+// See http://olivere.mit-license.org/license.txt for details.
+
 package aggretastic
 
 // MatrixMatrixStatsAggregation is a multi-value metrics aggregation
@@ -10,21 +14,19 @@ package aggretastic
 // See https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-metrics-stats-aggregation.html
 // for details.
 type MatrixStatsAggregation struct {
-	*tree
-
-	fields    []string
-	missing   interface{}
-	format    string
-	valueType interface{}
-	mode      string
-	meta      map[string]interface{}
+	fields		[]string
+	missing		interface{}
+	format		string
+	valueType	interface{}
+	mode		string
+	meta		map[string]interface{}
+	*Injectable
 }
 
 // NewMatrixStatsAggregation initializes a new MatrixStatsAggregation.
 func NewMatrixStatsAggregation() *MatrixStatsAggregation {
 	a := &MatrixStatsAggregation{}
-	a.tree = nilAggregationTree(a)
-
+	a.Injectable = newInjectable(a)
 	return a
 }
 

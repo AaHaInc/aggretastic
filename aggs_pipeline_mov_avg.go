@@ -1,3 +1,7 @@
+// Copyright 2012-present Oliver Eilhard. All rights reserved.
+// Use of this source code is governed by a MIT-license.
+// See http://olivere.mit-license.org/license.txt for details.
+
 package aggretastic
 
 // MovAvgAggregation operates on a series of data. It will slide a window
@@ -5,27 +9,29 @@ package aggretastic
 //
 // For more details, see
 // https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-pipeline-movavg-aggregation.html
+//
+// Deprecated: The MovAvgAggregation has been deprecated in 6.4.0. Use the more generate MovFnAggregation instead.
 type MovAvgAggregation struct {
-	*notInjectable
+	format		string
+	gapPolicy	string
+	model		MovAvgModel
+	window		*int
+	predict		*int
+	minimize	*bool
 
-	format    string
-	gapPolicy string
-	model     MovAvgModel
-	window    *int
-	predict   *int
-	minimize  *bool
-
-	meta         map[string]interface{}
-	bucketsPaths []string
+	meta		map[string]interface{}
+	bucketsPaths	[]string
+	*NotInjectable
 }
 
 // NewMovAvgAggregation creates and initializes a new MovAvgAggregation.
+//
+// Deprecated: The MovAvgAggregation has been deprecated in 6.4.0. Use the more generate MovFnAggregation instead.
 func NewMovAvgAggregation() *MovAvgAggregation {
 	a := &MovAvgAggregation{
 		bucketsPaths: make([]string, 0),
 	}
-	a.notInjectable = newNotInjectable(a)
-
+	a.NotInjectable = newNotInjectable(a)
 	return a
 }
 
@@ -197,8 +203,8 @@ func (m *EWMAMovAvgModel) Settings() map[string]interface{} {
 // For more details, see
 // https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-pipeline-movavg-aggregation.html#_holt_linear
 type HoltLinearMovAvgModel struct {
-	alpha *float64
-	beta  *float64
+	alpha	*float64
+	beta	*float64
 }
 
 // NewHoltLinearMovAvgModel creates and initializes a new HoltLinearMovAvgModel.
@@ -246,12 +252,12 @@ func (m *HoltLinearMovAvgModel) Settings() map[string]interface{} {
 // For more details, see
 // https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-pipeline-movavg-aggregation.html#_holt_winters
 type HoltWintersMovAvgModel struct {
-	alpha           *float64
-	beta            *float64
-	gamma           *float64
-	period          *int
-	seasonalityType string
-	pad             *bool
+	alpha		*float64
+	beta		*float64
+	gamma		*float64
+	period		*int
+	seasonalityType	string
+	pad		*bool
 }
 
 // NewHoltWintersMovAvgModel creates and initializes a new HoltWintersMovAvgModel.

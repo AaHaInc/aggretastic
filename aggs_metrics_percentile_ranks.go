@@ -1,25 +1,32 @@
+// Copyright 2012-present Oliver Eilhard. All rights reserved.
+// Use of this source code is governed by a MIT-license.
+// See http://olivere.mit-license.org/license.txt for details.
+
 package aggretastic
 
-import "github.com/olivere/elastic"
+import (
+	"github.com/olivere/elastic"
+)
 
 // PercentileRanksAggregation
 // See: https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-metrics-percentile-rank-aggregation.html
 type PercentileRanksAggregation struct {
-	*tree
-
-	field       string
-	script      *elastic.Script
-	format      string
-	meta        map[string]interface{}
-	values      []float64
-	compression *float64
-	estimator   string
+	field		string
+	script		*elastic.Script
+	format		string
+	missing		interface{}
+	meta		map[string]interface{}
+	values		[]float64
+	compression	*float64
+	estimator	string
+	*Injectable
 }
 
 func NewPercentileRanksAggregation() *PercentileRanksAggregation {
-	a := &PercentileRanksAggregation{values: make([]float64, 0)}
-	a.tree = nilAggregationTree(a)
-
+	a := &PercentileRanksAggregation{
+		values: make([]float64, 0),
+	}
+	a.Injectable = newInjectable(a)
 	return a
 }
 
@@ -35,6 +42,11 @@ func (a *PercentileRanksAggregation) Script(script *elastic.Script) *PercentileR
 
 func (a *PercentileRanksAggregation) Format(format string) *PercentileRanksAggregation {
 	a.format = format
+	return a
+}
+
+func (a *PercentileRanksAggregation) Missing(missing interface{}) *PercentileRanksAggregation {
+	a.missing = missing
 	return a
 }
 
@@ -97,6 +109,9 @@ func (a *PercentileRanksAggregation) Source() (interface{}, error) {
 	}
 	if a.format != "" {
 		opts["format"] = a.format
+	}
+	if a.missing != nil {
+		opts["missing"] = a.missing
 	}
 	if len(a.values) > 0 {
 		opts["values"] = a.values

@@ -1,3 +1,7 @@
+// Copyright 2012-present Oliver Eilhard. All rights reserved.
+// Use of this source code is governed by a MIT-license.
+// See http://olivere.mit-license.org/license.txt for details.
+
 package aggretastic
 
 // GeoDistanceAggregation is a multi-bucket aggregation that works on geo_point fields
@@ -9,28 +13,26 @@ package aggretastic
 // document and the origin falls within the distance range of the bucket).
 // See: https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-bucket-geodistance-aggregation.html
 type GeoDistanceAggregation struct {
-	*tree
-
-	field        string
-	unit         string
-	distanceType string
-	point        string
-	ranges       []geoDistAggRange
-	meta         map[string]interface{}
+	field		string
+	unit		string
+	distanceType	string
+	point		string
+	ranges		[]geoDistAggRange
+	meta		map[string]interface{}
+	*Injectable
 }
 
 type geoDistAggRange struct {
-	Key  string
-	From interface{}
-	To   interface{}
+	Key	string
+	From	interface{}
+	To	interface{}
 }
 
 func NewGeoDistanceAggregation() *GeoDistanceAggregation {
 	a := &GeoDistanceAggregation{
 		ranges: make([]geoDistAggRange, 0),
 	}
-	a.tree = nilAggregationTree(a)
-
+	a.Injectable = newInjectable(a)
 	return a
 }
 

@@ -1,3 +1,7 @@
+// Copyright 2012-present Oliver Eilhard. All rights reserved.
+// Use of this source code is governed by a MIT-license.
+// See http://olivere.mit-license.org/license.txt for details.
+
 package aggretastic
 
 // SumBucketAggregation is a sibling pipeline aggregation which calculates
@@ -8,13 +12,12 @@ package aggretastic
 // For more details, see
 // https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-pipeline-sum-bucket-aggregation.html
 type SumBucketAggregation struct {
-	*notInjectable
+	format		string
+	gapPolicy	string
 
-	format    string
-	gapPolicy string
-
-	meta         map[string]interface{}
-	bucketsPaths []string
+	meta		map[string]interface{}
+	bucketsPaths	[]string
+	*NotInjectable
 }
 
 // NewSumBucketAggregation creates and initializes a new SumBucketAggregation.
@@ -22,8 +25,7 @@ func NewSumBucketAggregation() *SumBucketAggregation {
 	a := &SumBucketAggregation{
 		bucketsPaths: make([]string, 0),
 	}
-	a.notInjectable = newNotInjectable(a)
-
+	a.NotInjectable = newNotInjectable(a)
 	return a
 }
 

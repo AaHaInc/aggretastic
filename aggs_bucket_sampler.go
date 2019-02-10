@@ -1,3 +1,7 @@
+// Copyright 2012-present Oliver Eilhard. All rights reserved.
+// Use of this source code is governed by a MIT-license.
+// See http://olivere.mit-license.org/license.txt for details.
+
 package aggretastic
 
 // SamplerAggregation is a filtering aggregation used to limit any
@@ -7,22 +11,20 @@ package aggretastic
 //
 // See: https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-bucket-sampler-aggregation.html
 type SamplerAggregation struct {
-	*tree
+	meta	map[string]interface{}
 
-	meta map[string]interface{}
-
-	shardSize       int
-	maxDocsPerValue int
-	executionHint   string
+	shardSize	int
+	maxDocsPerValue	int
+	executionHint	string
+	*Injectable
 }
 
 func NewSamplerAggregation() *SamplerAggregation {
 	a := &SamplerAggregation{
-		shardSize:       -1,
-		maxDocsPerValue: -1,
+		shardSize:		-1,
+		maxDocsPerValue:	-1,
 	}
-	a.tree = nilAggregationTree(a)
-
+	a.Injectable = newInjectable(a)
 	return a
 }
 

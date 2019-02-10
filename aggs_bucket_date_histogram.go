@@ -1,34 +1,39 @@
+// Copyright 2012-present Oliver Eilhard. All rights reserved.
+// Use of this source code is governed by a MIT-license.
+// See http://olivere.mit-license.org/license.txt for details.
+
 package aggretastic
 
-import "github.com/olivere/elastic"
+import (
+	"github.com/olivere/elastic"
+)
 
 // DateHistogramAggregation is a multi-bucket aggregation similar to the
 // histogram except it can only be applied on date values.
 // See: https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-bucket-datehistogram-aggregation.html
 type DateHistogramAggregation struct {
-	*tree
+	field	string
+	script	*elastic.Script
+	missing	interface{}
+	meta	map[string]interface{}
 
-	field   string
-	script  *elastic.Script
-	missing interface{}
-	meta    map[string]interface{}
-
-	interval          string
-	order             string
-	orderAsc          bool
-	minDocCount       *int64
-	extendedBoundsMin interface{}
-	extendedBoundsMax interface{}
-	timeZone          string
-	format            string
-	offset            string
+	interval		string
+	order			string
+	orderAsc		bool
+	minDocCount		*int64
+	extendedBoundsMin	interface{}
+	extendedBoundsMax	interface{}
+	timeZone		string
+	format			string
+	offset			string
+	keyed			*bool
+	*Injectable
 }
 
 // NewDateHistogramAggregation creates a new DateHistogramAggregation.
 func NewDateHistogramAggregation() *DateHistogramAggregation {
 	a := &DateHistogramAggregation{}
-	a.tree = nilAggregationTree(a)
-
+	a.Injectable = newInjectable(a)
 	return a
 }
 
@@ -196,6 +201,14 @@ func (a *DateHistogramAggregation) ExtendedBoundsMax(max interface{}) *DateHisto
 	return a
 }
 
+// Keyed specifies whether to return the results with a keyed response (or not).
+//
+// See https://www.elastic.co/guide/en/elasticsearch/reference/6.4/search-aggregations-bucket-datehistogram-aggregation.html#_keyed_response_3.
+func (a *DateHistogramAggregation) Keyed(keyed bool) *DateHistogramAggregation {
+	a.keyed = &keyed
+	return a
+}
+
 func (a *DateHistogramAggregation) Source() (interface{}, error) {
 	// Example:
 	// {
@@ -261,6 +274,9 @@ func (a *DateHistogramAggregation) Source() (interface{}, error) {
 			bounds["max"] = a.extendedBoundsMax
 		}
 		opts["extended_bounds"] = bounds
+	}
+	if a.keyed != nil {
+		opts["keyed"] = *a.keyed
 	}
 
 	// AggregationBuilder (SubAggregations)

@@ -1,6 +1,12 @@
+// Copyright 2012-present Oliver Eilhard. All rights reserved.
+// Use of this source code is governed by a MIT-license.
+// See http://olivere.mit-license.org/license.txt for details.
+
 package aggretastic
 
-import "github.com/olivere/elastic"
+import (
+	"github.com/olivere/elastic"
+)
 
 // HistogramAggregation is a multi-bucket values source based aggregation
 // that can be applied on numeric values extracted from the documents.
@@ -8,26 +14,24 @@ import "github.com/olivere/elastic"
 // values.
 // See: https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-bucket-histogram-aggregation.html
 type HistogramAggregation struct {
-	*tree
+	field	string
+	script	*elastic.Script
+	missing	interface{}
+	meta	map[string]interface{}
 
-	field   string
-	script  *elastic.Script
-	missing interface{}
-	meta    map[string]interface{}
-
-	interval    float64
-	order       string
-	orderAsc    bool
-	minDocCount *int64
-	minBounds   *float64
-	maxBounds   *float64
-	offset      *float64
+	interval	float64
+	order		string
+	orderAsc	bool
+	minDocCount	*int64
+	minBounds	*float64
+	maxBounds	*float64
+	offset		*float64
+	*Injectable
 }
 
 func NewHistogramAggregation() *HistogramAggregation {
 	a := &HistogramAggregation{}
-	a.tree = nilAggregationTree(a)
-
+	a.Injectable = newInjectable(a)
 	return a
 }
 

@@ -1,6 +1,12 @@
+// Copyright 2012-present Oliver Eilhard. All rights reserved.
+// Use of this source code is governed by a MIT-license.
+// See http://olivere.mit-license.org/license.txt for details.
+
 package aggretastic
 
-import "github.com/olivere/elastic"
+import (
+	"github.com/olivere/elastic"
+)
 
 // BucketSelectorAggregation is a parent pipeline aggregation which
 // determines whether the current bucket will be retained in the parent
@@ -12,21 +18,21 @@ import "github.com/olivere/elastic"
 // For more details, see
 // https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-pipeline-bucket-selector-aggregation.html
 type BucketSelectorAggregation struct {
-	*notInjectable
+	format		string
+	gapPolicy	string
+	script		*elastic.Script
 
-	format    string
-	gapPolicy string
-	script    *elastic.Script
-
-	meta            map[string]interface{}
-	bucketsPathsMap map[string]string
+	meta		map[string]interface{}
+	bucketsPathsMap	map[string]string
+	*NotInjectable
 }
 
 // NewBucketSelectorAggregation creates and initializes a new BucketSelectorAggregation.
 func NewBucketSelectorAggregation() *BucketSelectorAggregation {
-	a := &BucketSelectorAggregation{}
-	a.notInjectable = newNotInjectable(a)
-
+	a := &BucketSelectorAggregation{
+		bucketsPathsMap: make(map[string]string),
+	}
+	a.NotInjectable = newNotInjectable(a)
 	return a
 }
 

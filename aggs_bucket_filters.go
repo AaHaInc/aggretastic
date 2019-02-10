@@ -1,7 +1,12 @@
+// Copyright 2012-present Oliver Eilhard. All rights reserved.
+// Use of this source code is governed by a MIT-license.
+// See http://olivere.mit-license.org/license.txt for details.
+
 package aggretastic
 
 import (
 	"errors"
+
 	"github.com/olivere/elastic"
 )
 
@@ -16,21 +21,19 @@ import (
 // For details, see
 // https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-bucket-filters-aggregation.html
 type FiltersAggregation struct {
-	*tree
-
-	unnamedFilters []elastic.Query
-	namedFilters   map[string]elastic.Query
-	meta           map[string]interface{}
+	unnamedFilters	[]elastic.Query
+	namedFilters	map[string]elastic.Query
+	meta		map[string]interface{}
+	*Injectable
 }
 
 // NewFiltersAggregation initializes a new FiltersAggregation.
 func NewFiltersAggregation() *FiltersAggregation {
 	a := &FiltersAggregation{
-		unnamedFilters: make([]elastic.Query, 0),
-		namedFilters:   make(map[string]elastic.Query),
+		unnamedFilters:	make([]elastic.Query, 0),
+		namedFilters:	make(map[string]elastic.Query),
 	}
-	a.tree = nilAggregationTree(a)
-
+	a.Injectable = newInjectable(a)
 	return a
 }
 

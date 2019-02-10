@@ -1,3 +1,7 @@
+// Copyright 2012-present Oliver Eilhard. All rights reserved.
+// Use of this source code is governed by a MIT-license.
+// See http://olivere.mit-license.org/license.txt for details.
+
 package aggretastic
 
 // DerivativeAggregation is a parent pipeline aggregation which calculates
@@ -8,14 +12,13 @@ package aggretastic
 // For more details, see
 // https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-pipeline-derivative-aggregation.html
 type DerivativeAggregation struct {
-	*notInjectable
+	format		string
+	gapPolicy	string
+	unit		string
 
-	format    string
-	gapPolicy string
-	unit      string
-
-	meta         map[string]interface{}
-	bucketsPaths []string
+	meta		map[string]interface{}
+	bucketsPaths	[]string
+	*NotInjectable
 }
 
 // NewDerivativeAggregation creates and initializes a new DerivativeAggregation.
@@ -23,8 +26,7 @@ func NewDerivativeAggregation() *DerivativeAggregation {
 	a := &DerivativeAggregation{
 		bucketsPaths: make([]string, 0),
 	}
-	a.notInjectable = newNotInjectable(a)
-
+	a.NotInjectable = newNotInjectable(a)
 	return a
 }
 

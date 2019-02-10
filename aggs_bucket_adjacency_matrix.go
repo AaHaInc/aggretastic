@@ -1,6 +1,12 @@
+// Copyright 2012-present Oliver Eilhard. All rights reserved.
+// Use of this source code is governed by a MIT-license.
+// See http://olivere.mit-license.org/license.txt for details.
+
 package aggretastic
 
-import "github.com/olivere/elastic"
+import (
+	"github.com/olivere/elastic"
+)
 
 // AdjacencyMatrixAggregation returning a form of adjacency matrix.
 // The request provides a collection of named filter expressions,
@@ -10,17 +16,17 @@ import "github.com/olivere/elastic"
 // For details, see
 // https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-bucket-adjacency-matrix-aggregation.html
 type AdjacencyMatrixAggregation struct {
-	*tree
-
-	filters map[string]elastic.Query
-	meta    map[string]interface{}
+	filters	map[string]elastic.Query
+	meta	map[string]interface{}
+	*Injectable
 }
 
 // NewAdjacencyMatrixAggregation initializes a new AdjacencyMatrixAggregation.
 func NewAdjacencyMatrixAggregation() *AdjacencyMatrixAggregation {
-	a := &AdjacencyMatrixAggregation{filters: make(map[string]elastic.Query)}
-	a.tree = nilAggregationTree(a)
-
+	a := &AdjacencyMatrixAggregation{
+		filters: make(map[string]elastic.Query),
+	}
+	a.Injectable = newInjectable(a)
 	return a
 }
 

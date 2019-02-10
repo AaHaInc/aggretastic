@@ -1,0 +1,31 @@
+// Copyright 2012-present Oliver Eilhard. All rights reserved.
+// Use of this source code is governed by a MIT-license.
+// See http://olivere.mit-license.org/license.txt for details.
+
+package aggretastic
+
+import (
+	"encoding/json"
+	"testing"
+	"github.com/olivere/elastic"
+)
+
+func TestBucketScriptAggregation(t *testing.T) {
+	agg := NewBucketScriptAggregation().
+		AddBucketsPath("tShirtSales", "t-shirts>sales").
+		AddBucketsPath("totalSales", "total_sales").
+		Script(elastic.NewScript("tShirtSales / totalSales * 100"))
+	src, err := agg.Source()
+	if err != nil {
+		t.Fatal(err)
+	}
+	data, err := json.Marshal(src)
+	if err != nil {
+		t.Fatalf("marshaling to JSON failed: %v", err)
+	}
+	got := string(data)
+	expected := `{"bucket_script":{"buckets_path":{"tShirtSales":"t-shirts\u003esales","totalSales":"total_sales"},"script":{"source":"tShirtSales / totalSales * 100"}}}`
+	if got != expected {
+		t.Errorf("expected\n%s\n,got:\n%s", expected, got)
+	}
+}

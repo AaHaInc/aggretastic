@@ -1,6 +1,12 @@
+// Copyright 2012-present Oliver Eilhard. All rights reserved.
+// Use of this source code is governed by a MIT-license.
+// See http://olivere.mit-license.org/license.txt for details.
+
 package aggretastic
 
-import "github.com/olivere/elastic"
+import (
+	"github.com/olivere/elastic"
+)
 
 // DiversifiedSamplerAggregation Like the ‘sampler` aggregation this is a filtering aggregation used to limit any
 // sub aggregations’ processing to a sample of the top-scoring documents. The diversified_sampler aggregation adds
@@ -8,23 +14,21 @@ import "github.com/olivere/elastic"
 //
 // See: https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-bucket-diversified-sampler-aggregation.html
 type DiversifiedSamplerAggregation struct {
-	*tree
-
-	meta            map[string]interface{}
-	field           string
-	script          *elastic.Script
-	shardSize       int
-	maxDocsPerValue int
-	executionHint   string
+	meta		map[string]interface{}
+	field		string
+	script		*elastic.Script
+	shardSize	int
+	maxDocsPerValue	int
+	executionHint	string
+	*Injectable
 }
 
 func NewDiversifiedSamplerAggregation() *DiversifiedSamplerAggregation {
 	a := &DiversifiedSamplerAggregation{
-		shardSize:       -1,
-		maxDocsPerValue: -1,
+		shardSize:		-1,
+		maxDocsPerValue:	-1,
 	}
-	a.tree = nilAggregationTree(a)
-
+	a.Injectable = newInjectable(a)
 	return a
 }
 

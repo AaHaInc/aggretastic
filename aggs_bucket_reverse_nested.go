@@ -1,3 +1,7 @@
+// Copyright 2012-present Oliver Eilhard. All rights reserved.
+// Use of this source code is governed by a MIT-license.
+// See http://olivere.mit-license.org/license.txt for details.
+
 package aggretastic
 
 // ReverseNestedAggregation defines a special single bucket aggregation
@@ -9,18 +13,16 @@ package aggretastic
 //
 // See: https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-bucket-reverse-nested-aggregation.html
 type ReverseNestedAggregation struct {
-	*tree
-
-	path string
-	meta map[string]interface{}
+	path		string
+	meta		map[string]interface{}
+	*Injectable
 }
 
 // NewReverseNestedAggregation initializes a new ReverseNestedAggregation
 // bucket aggregation.
 func NewReverseNestedAggregation() *ReverseNestedAggregation {
 	a := &ReverseNestedAggregation{}
-	a.tree = nilAggregationTree(a)
-
+	a.Injectable = newInjectable(a)
 	return a
 }
 

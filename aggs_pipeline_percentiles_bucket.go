@@ -1,3 +1,7 @@
+// Copyright 2012-2015 Oliver Eilhard. All rights reserved.
+// Use of this source code is governed by a MIT-license.
+// See http://olivere.mit-license.org/license.txt for details.
+
 package aggretastic
 
 // PercentilesBucketAggregation is a sibling pipeline aggregation which calculates
@@ -8,21 +12,19 @@ package aggretastic
 // For more details, see
 // https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-pipeline-percentiles-bucket-aggregation.html
 type PercentilesBucketAggregation struct {
-	*notInjectable
+	format		string
+	gapPolicy	string
+	percents	[]float64
+	bucketsPaths	[]string
 
-	format       string
-	gapPolicy    string
-	percents     []float64
-	bucketsPaths []string
-
-	meta map[string]interface{}
+	meta		map[string]interface{}
+	*NotInjectable
 }
 
 // NewPercentilesBucketAggregation creates and initializes a new PercentilesBucketAggregation.
 func NewPercentilesBucketAggregation() *PercentilesBucketAggregation {
 	a := &PercentilesBucketAggregation{}
-	a.notInjectable = newNotInjectable(a)
-
+	a.NotInjectable = newNotInjectable(a)
 	return a
 }
 

@@ -1,29 +1,33 @@
+// Copyright 2012-present Oliver Eilhard. All rights reserved.
+// Use of this source code is governed by a MIT-license.
+// See http://olivere.mit-license.org/license.txt for details.
+
 package aggretastic
 
-import "github.com/olivere/elastic"
+import (
+	"github.com/olivere/elastic"
+)
 
 // SignificantTermsAggregation is an aggregation that returns interesting
 // or unusual occurrences of terms in a set.
 // See: https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-bucket-significantterms-aggregation.html
 type SignificantTermsAggregation struct {
-	*tree
+	field	string
+	meta	map[string]interface{}
 
-	field string
-	meta  map[string]interface{}
-
-	minDocCount           *int
-	shardMinDocCount      *int
-	requiredSize          *int
-	shardSize             *int
-	filter                elastic.Query
-	executionHint         string
-	significanceHeuristic SignificanceHeuristic
+	minDocCount		*int
+	shardMinDocCount	*int
+	requiredSize		*int
+	shardSize		*int
+	filter			elastic.Query
+	executionHint		string
+	significanceHeuristic	SignificanceHeuristic
+	*Injectable
 }
 
 func NewSignificantTermsAggregation() *SignificantTermsAggregation {
 	a := &SignificantTermsAggregation{}
-	a.tree = nilAggregationTree(a)
-
+	a.Injectable = newInjectable(a)
 	return a
 }
 
@@ -103,7 +107,7 @@ func (a *SignificantTermsAggregation) Source() (interface{}, error) {
 		opts["field"] = a.field
 	}
 	if a.requiredSize != nil {
-		opts["size"] = *a.requiredSize // not a typo!
+		opts["size"] = *a.requiredSize	// not a typo!
 	}
 	if a.shardSize != nil {
 		opts["shard_size"] = *a.shardSize
@@ -169,8 +173,8 @@ type SignificanceHeuristic interface {
 // See https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-bucket-significantterms-aggregation.html#_chi_square
 // for details.
 type ChiSquareSignificanceHeuristic struct {
-	backgroundIsSuperset *bool
-	includeNegatives     *bool
+	backgroundIsSuperset	*bool
+	includeNegatives	*bool
 }
 
 // NewChiSquareSignificanceHeuristic initializes a new ChiSquareSignificanceHeuristic.
@@ -279,8 +283,8 @@ func (sh *JLHScoreSignificanceHeuristic) Source() (interface{}, error) {
 // See https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-bucket-significantterms-aggregation.html#_mutual_information
 // for details.
 type MutualInformationSignificanceHeuristic struct {
-	backgroundIsSuperset *bool
-	includeNegatives     *bool
+	backgroundIsSuperset	*bool
+	includeNegatives	*bool
 }
 
 // NewMutualInformationSignificanceHeuristic initializes a new instance of

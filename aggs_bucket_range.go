@@ -1,8 +1,12 @@
+// Copyright 2012-present Oliver Eilhard. All rights reserved.
+// Use of this source code is governed by a MIT-license.
+// See http://olivere.mit-license.org/license.txt for details.
+
 package aggretastic
 
 import (
-	"github.com/olivere/elastic"
 	"time"
+	"github.com/olivere/elastic"
 )
 
 // RangeAggregation is a multi-bucket value source based aggregation that
@@ -13,29 +17,27 @@ import (
 // from value and excludes the to value for each range.
 // See: https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-bucket-range-aggregation.html
 type RangeAggregation struct {
-	*tree
-
-	field    string
-	script   *elastic.Script
-	missing  interface{}
-	meta     map[string]interface{}
-	keyed    *bool
-	unmapped *bool
-	entries  []rangeAggregationEntry
+	field		string
+	script		*elastic.Script
+	missing		interface{}
+	meta		map[string]interface{}
+	keyed		*bool
+	unmapped	*bool
+	entries		[]rangeAggregationEntry
+	*Injectable
 }
 
 type rangeAggregationEntry struct {
-	Key  string
-	From interface{}
-	To   interface{}
+	Key	string
+	From	interface{}
+	To	interface{}
 }
 
 func NewRangeAggregation() *RangeAggregation {
 	a := &RangeAggregation{
 		entries: make([]rangeAggregationEntry, 0),
 	}
-	a.tree = nilAggregationTree(a)
-
+	a.Injectable = newInjectable(a)
 	return a
 }
 

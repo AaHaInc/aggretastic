@@ -1,6 +1,12 @@
+// Copyright 2012-present Oliver Eilhard. All rights reserved.
+// Use of this source code is governed by a MIT-license.
+// See http://olivere.mit-license.org/license.txt for details.
+
 package aggretastic
 
-import "github.com/olivere/elastic"
+import (
+	"github.com/olivere/elastic"
+)
 
 // BucketSortAggregation parent pipeline aggregation which sorts the buckets
 // of its parent multi-bucket aggregation. Zero or more sort fields may be
@@ -11,14 +17,13 @@ import "github.com/olivere/elastic"
 // For more details, see
 // https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-pipeline-bucket-sort-aggregation.html
 type BucketSortAggregation struct {
-	*notInjectable
+	sorters		[]elastic.Sorter
+	from		int
+	size		int
+	gapPolicy	string
 
-	sorters   []elastic.Sorter
-	from      int
-	size      int
-	gapPolicy string
-
-	meta map[string]interface{}
+	meta	map[string]interface{}
+	*NotInjectable
 }
 
 // NewBucketSortAggregation creates and initializes a new BucketSortAggregation.
@@ -26,8 +31,7 @@ func NewBucketSortAggregation() *BucketSortAggregation {
 	a := &BucketSortAggregation{
 		size: -1,
 	}
-	a.notInjectable = newNotInjectable(a)
-
+	a.NotInjectable = newNotInjectable(a)
 	return a
 }
 

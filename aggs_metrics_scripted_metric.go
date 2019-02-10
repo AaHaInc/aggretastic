@@ -1,27 +1,29 @@
+// Copyright 2012-present Oliver Eilhard. All rights reserved.
+// Use of this source code is governed by a MIT-license.
+// See http://olivere.mit-license.org/license.txt for details.
 package aggretastic
 
-import "github.com/olivere/elastic"
+import (
+	"github.com/olivere/elastic"
+)
 
-// ScriptedMetricAggregation
-// wip (larry) careful to be used
+// ScriptedMetricAggregation is a a metric aggregation that executes using scripts to provide a metric output.
 //
 // See: https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-metrics-scripted-metric-aggregation.html
 type ScriptedMetricAggregation struct {
-	*notInjectable
+	initScript	*elastic.Script
+	mapScript	*elastic.Script
+	combineScript	*elastic.Script
+	reduceScript	*elastic.Script
 
-	initScript    *elastic.Script
-	mapScript     *elastic.Script
-	combineScript *elastic.Script
-	reduceScript  *elastic.Script
-
-	params map[string]interface{}
-	meta   map[string]interface{}
+	params	map[string]interface{}
+	meta	map[string]interface{}
+	*NotInjectable
 }
 
 func NewScriptedMetricAggregation() *ScriptedMetricAggregation {
 	a := &ScriptedMetricAggregation{}
-	a.notInjectable = newNotInjectable(a)
-
+	a.NotInjectable = newNotInjectable(a)
 	return a
 }
 

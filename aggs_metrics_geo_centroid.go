@@ -1,22 +1,26 @@
+// Copyright 2012-present Oliver Eilhard. All rights reserved.
+// Use of this source code is governed by a MIT-license.
+// See http://olivere.mit-license.org/license.txt for details.
+
 package aggretastic
 
-import "github.com/olivere/elastic"
+import (
+	"github.com/olivere/elastic"
+)
 
 // GeoCentroidAggregation is a metric aggregation that computes the weighted centroid
 // from all coordinate values for a Geo-point datatype field.
 // See: https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-metrics-geocentroid-aggregation.html
 type GeoCentroidAggregation struct {
-	*tree
-
-	field  string
-	script *elastic.Script
-	meta   map[string]interface{}
+	field	string
+	script	*elastic.Script
+	meta	map[string]interface{}
+	*Injectable
 }
 
 func NewGeoCentroidAggregation() *GeoCentroidAggregation {
 	a := &GeoCentroidAggregation{}
-	a.tree = nilAggregationTree(a)
-
+	a.Injectable = newInjectable(a)
 	return a
 }
 

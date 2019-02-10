@@ -1,6 +1,12 @@
+// Copyright 2012-present Oliver Eilhard. All rights reserved.
+// Use of this source code is governed by a MIT-license.
+// See http://olivere.mit-license.org/license.txt for details.
+
 package aggretastic
 
-import "github.com/olivere/elastic"
+import (
+	"github.com/olivere/elastic"
+)
 
 // MaxAggregation is a single-value metrics aggregation that keeps track and
 // returns the maximum value among the numeric values extracted from
@@ -9,18 +15,17 @@ import "github.com/olivere/elastic"
 // a provided script.
 // See: https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-metrics-max-aggregation.html
 type MaxAggregation struct {
-	*tree
-
-	field  string
-	script *elastic.Script
-	format string
-	meta   map[string]interface{}
+	field	string
+	script	*elastic.Script
+	format	string
+	missing	interface{}
+	meta	map[string]interface{}
+	*Injectable
 }
 
 func NewMaxAggregation() *MaxAggregation {
 	a := &MaxAggregation{}
-	a.tree = nilAggregationTree(a)
-
+	a.Injectable = newInjectable(a)
 	return a
 }
 
@@ -36,6 +41,11 @@ func (a *MaxAggregation) Script(script *elastic.Script) *MaxAggregation {
 
 func (a *MaxAggregation) Format(format string) *MaxAggregation {
 	a.format = format
+	return a
+}
+
+func (a *MaxAggregation) Missing(missing interface{}) *MaxAggregation {
+	a.missing = missing
 	return a
 }
 
@@ -75,6 +85,9 @@ func (a *MaxAggregation) Source() (interface{}, error) {
 	}
 	if a.format != "" {
 		opts["format"] = a.format
+	}
+	if a.missing != nil {
+		opts["missing"] = a.missing
 	}
 
 	// AggregationBuilder (SubAggregations)

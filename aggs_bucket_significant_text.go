@@ -1,28 +1,32 @@
+// Copyright 2012-present Oliver Eilhard. All rights reserved.
+// Use of this source code is governed by a MIT-license.
+// See http://olivere.mit-license.org/license.txt for details.
+
 package aggretastic
 
-import "github.com/olivere/elastic"
+import (
+	"github.com/olivere/elastic"
+)
 
 // SignificantTextAggregation returns interesting or unusual occurrences
 // of free-text terms in a set.
 // See: https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-bucket-significanttext-aggregation.html
 type SignificantTextAggregation struct {
-	*tree
+	field	string
+	meta	map[string]interface{}
 
-	field string
-	meta  map[string]interface{}
-
-	sourceFieldNames      []string
-	filterDuplicateText   *bool
-	includeExclude        *TermsAggregationIncludeExclude
-	filter                elastic.Query
-	bucketCountThresholds *BucketCountThresholds
-	significanceHeuristic SignificanceHeuristic
+	sourceFieldNames	[]string
+	filterDuplicateText	*bool
+	includeExclude		*TermsAggregationIncludeExclude
+	filter			elastic.Query
+	bucketCountThresholds	*BucketCountThresholds
+	significanceHeuristic	SignificanceHeuristic
+	*Injectable
 }
 
 func NewSignificantTextAggregation() *SignificantTextAggregation {
 	a := &SignificantTextAggregation{}
-	a.tree = nilAggregationTree(a)
-
+	a.Injectable = newInjectable(a)
 	return a
 }
 

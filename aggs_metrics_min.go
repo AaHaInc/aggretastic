@@ -1,6 +1,12 @@
+// Copyright 2012-present Oliver Eilhard. All rights reserved.
+// Use of this source code is governed by a MIT-license.
+// See http://olivere.mit-license.org/license.txt for details.
+
 package aggretastic
 
-import "github.com/olivere/elastic"
+import (
+	"github.com/olivere/elastic"
+)
 
 // MinAggregation is a single-value metrics aggregation that keeps track and
 // returns the minimum value among numeric values extracted from the
@@ -9,18 +15,17 @@ import "github.com/olivere/elastic"
 // provided script.
 // See: https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-metrics-min-aggregation.html
 type MinAggregation struct {
-	*tree
-
-	field  string
-	script *elastic.Script
-	format string
-	meta   map[string]interface{}
+	field	string
+	script	*elastic.Script
+	format	string
+	missing	interface{}
+	meta	map[string]interface{}
+	*Injectable
 }
 
 func NewMinAggregation() *MinAggregation {
 	a := &MinAggregation{}
-	a.tree = nilAggregationTree(a)
-
+	a.Injectable = newInjectable(a)
 	return a
 }
 
@@ -36,6 +41,11 @@ func (a *MinAggregation) Script(script *elastic.Script) *MinAggregation {
 
 func (a *MinAggregation) Format(format string) *MinAggregation {
 	a.format = format
+	return a
+}
+
+func (a *MinAggregation) Missing(missing interface{}) *MinAggregation {
+	a.missing = missing
 	return a
 }
 
@@ -76,6 +86,9 @@ func (a *MinAggregation) Source() (interface{}, error) {
 	}
 	if a.format != "" {
 		opts["format"] = a.format
+	}
+	if a.missing != nil {
+		opts["missing"] = a.missing
 	}
 
 	// AggregationBuilder (SubAggregations)

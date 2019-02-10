@@ -1,22 +1,20 @@
 package aggretastic
 
 type GeoHashGridAggregation struct {
-	*tree
-
-	field     string
-	precision interface{}
-	size      int
-	shardSize int
-	meta      map[string]interface{}
+	field		string
+	precision	interface{}
+	size		int
+	shardSize	int
+	meta		map[string]interface{}
+	*Injectable
 }
 
 func NewGeoHashGridAggregation() *GeoHashGridAggregation {
 	a := &GeoHashGridAggregation{
-		size:      -1,
-		shardSize: -1,
+		size:		-1,
+		shardSize:	-1,
 	}
-	a.tree = nilAggregationTree(a)
-
+	a.Injectable = newInjectable(a)
 	return a
 }
 

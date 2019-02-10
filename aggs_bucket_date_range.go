@@ -1,8 +1,12 @@
+// Copyright 2012-present Oliver Eilhard. All rights reserved.
+// Use of this source code is governed by a MIT-license.
+// See http://olivere.mit-license.org/license.txt for details.
+
 package aggretastic
 
 import (
-	"github.com/olivere/elastic"
 	"time"
+	"github.com/olivere/elastic"
 )
 
 // DateRangeAggregation is a range aggregation that is dedicated for
@@ -14,28 +18,28 @@ import (
 // value for each range.
 // See: https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-bucket-daterange-aggregation.html
 type DateRangeAggregation struct {
-	*tree
-
-	field    string
-	script   *elastic.Script
-	meta     map[string]interface{}
-	keyed    *bool
-	unmapped *bool
-	timeZone string
-	format   string
-	entries  []DateRangeAggregationEntry
+	field		string
+	script		*elastic.Script
+	meta		map[string]interface{}
+	keyed		*bool
+	unmapped	*bool
+	timeZone	string
+	format		string
+	entries		[]DateRangeAggregationEntry
+	*Injectable
 }
 
 type DateRangeAggregationEntry struct {
-	Key  string
-	From interface{}
-	To   interface{}
+	Key	string
+	From	interface{}
+	To	interface{}
 }
 
 func NewDateRangeAggregation() *DateRangeAggregation {
-	a := &DateRangeAggregation{entries: make([]DateRangeAggregationEntry, 0)}
-	a.tree = nilAggregationTree(a)
-
+	a := &DateRangeAggregation{
+		entries: make([]DateRangeAggregationEntry, 0),
+	}
+	a.Injectable = newInjectable(a)
 	return a
 }
 

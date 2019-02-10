@@ -1,3 +1,7 @@
+// Copyright 2012-present Oliver Eilhard. All rights reserved.
+// Use of this source code is governed by a MIT-license.
+// See http://olivere.mit-license.org/license.txt for details.
+
 package aggretastic
 
 // ChildrenAggregation is a special single bucket aggregation that enables
@@ -5,16 +9,14 @@ package aggretastic
 // It is available from 1.4.0.Beta1 upwards.
 // See: https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-bucket-children-aggregation.html
 type ChildrenAggregation struct {
-	*tree
-
-	typ  string
-	meta map[string]interface{}
+	typ		string
+	meta		map[string]interface{}
+	*Injectable
 }
 
 func NewChildrenAggregation() *ChildrenAggregation {
 	a := &ChildrenAggregation{}
-	a.tree = nilAggregationTree(a)
-
+	a.Injectable = newInjectable(a)
 	return a
 }
 

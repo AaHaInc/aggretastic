@@ -1,36 +1,40 @@
+// Copyright 2012-present Oliver Eilhard. All rights reserved.
+// Use of this source code is governed by a MIT-license.
+// See http://olivere.mit-license.org/license.txt for details.
+
 package aggretastic
 
-import "github.com/olivere/elastic"
+import (
+	"github.com/olivere/elastic"
+)
 
 // TermsAggregation is a multi-bucket value source based aggregation
 // where buckets are dynamically built - one per unique value.
 //
 // See: http://www.elasticsearch.org/guide/en/elasticsearch/reference/6.2/search-aggregations-bucket-terms-aggregation.html
 type TermsAggregation struct {
-	*tree
+	field	string
+	script	*elastic.Script
+	missing	interface{}
+	meta	map[string]interface{}
 
-	field   string
-	script  *elastic.Script
-	missing interface{}
-	meta    map[string]interface{}
-
-	size                  *int
-	shardSize             *int
-	requiredSize          *int
-	minDocCount           *int
-	shardMinDocCount      *int
-	valueType             string
-	includeExclude        *TermsAggregationIncludeExclude
-	executionHint         string
-	collectionMode        string
-	showTermDocCountError *bool
-	order                 []TermsOrder
+	size			*int
+	shardSize		*int
+	requiredSize		*int
+	minDocCount		*int
+	shardMinDocCount	*int
+	valueType		string
+	includeExclude		*TermsAggregationIncludeExclude
+	executionHint		string
+	collectionMode		string
+	showTermDocCountError	*bool
+	order			[]TermsOrder
+	*Injectable
 }
 
 func NewTermsAggregation() *TermsAggregation {
 	a := &TermsAggregation{}
-	a.tree = nilAggregationTree(a)
-
+	a.Injectable = newInjectable(a)
 	return a
 }
 
@@ -159,18 +163,35 @@ func (a *TermsAggregation) OrderByCountDesc() *TermsAggregation {
 	return a.OrderByCount(false)
 }
 
+// Deprecated: Use OrderByKey instead.
 func (a *TermsAggregation) OrderByTerm(asc bool) *TermsAggregation {
 	// "order" : { "_term" : "asc" }
 	a.order = append(a.order, TermsOrder{Field: "_term", Ascending: asc})
 	return a
 }
 
+// Deprecated: Use OrderByKeyAsc instead.
 func (a *TermsAggregation) OrderByTermAsc() *TermsAggregation {
 	return a.OrderByTerm(true)
 }
 
+// Deprecated: Use OrderByKeyDesc instead.
 func (a *TermsAggregation) OrderByTermDesc() *TermsAggregation {
 	return a.OrderByTerm(false)
+}
+
+func (a *TermsAggregation) OrderByKey(asc bool) *TermsAggregation {
+	// "order" : { "_term" : "asc" }
+	a.order = append(a.order, TermsOrder{Field: "_key", Ascending: asc})
+	return a
+}
+
+func (a *TermsAggregation) OrderByKeyAsc() *TermsAggregation {
+	return a.OrderByKey(true)
+}
+
+func (a *TermsAggregation) OrderByKeyDesc() *TermsAggregation {
+	return a.OrderByKey(false)
 }
 
 // OrderByAggregation creates a bucket ordering strategy which sorts buckets
@@ -343,18 +364,18 @@ func (a *TermsAggregation) Source() (interface{}, error) {
 
 // TermsAggregationIncludeExclude allows for include/exclude in a TermsAggregation.
 type TermsAggregationIncludeExclude struct {
-	Include       string
-	Exclude       string
-	IncludeValues []interface{}
-	ExcludeValues []interface{}
-	Partition     int
-	NumPartitions int
+	Include		string
+	Exclude		string
+	IncludeValues	[]interface{}
+	ExcludeValues	[]interface{}
+	Partition	int
+	NumPartitions	int
 }
 
 // TermsOrder specifies a single order field for a terms aggregation.
 type TermsOrder struct {
-	Field     string
-	Ascending bool
+	Field		string
+	Ascending	bool
 }
 
 // Source returns serializable JSON of the TermsOrder.

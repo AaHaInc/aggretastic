@@ -1,23 +1,27 @@
+// Copyright 2012-present Oliver Eilhard. All rights reserved.
+// Use of this source code is governed by a MIT-license.
+// See http://olivere.mit-license.org/license.txt for details.
+
 package aggretastic
 
-import "github.com/olivere/elastic"
+import (
+	"github.com/olivere/elastic"
+)
 
 // GeoBoundsAggregation is a metric aggregation that computes the
 // bounding box containing all geo_point values for a field.
 // See: https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-metrics-geobounds-aggregation.html
 type GeoBoundsAggregation struct {
-	*tree
-
-	field         string
-	script        *elastic.Script
-	wrapLongitude *bool
-	meta          map[string]interface{}
+	field		string
+	script		*elastic.Script
+	wrapLongitude	*bool
+	meta		map[string]interface{}
+	*Injectable
 }
 
 func NewGeoBoundsAggregation() *GeoBoundsAggregation {
 	a := &GeoBoundsAggregation{}
-	a.tree = nilAggregationTree(a)
-
+	a.Injectable = newInjectable(a)
 	return a
 }
 

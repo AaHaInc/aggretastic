@@ -1,6 +1,12 @@
+// Copyright 2012-present Oliver Eilhard. All rights reserved.
+// Use of this source code is governed by a MIT-license.
+// See http://olivere.mit-license.org/license.txt for details.
+
 package aggretastic
 
-import "github.com/olivere/elastic"
+import (
+	"github.com/olivere/elastic"
+)
 
 // FilterAggregation defines a single bucket of all the documents
 // in the current document set context that match a specified filter.
@@ -8,16 +14,14 @@ import "github.com/olivere/elastic"
 // to a specific set of documents.
 // See: https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-bucket-filter-aggregation.html
 type FilterAggregation struct {
-	*tree
-
-	filter elastic.Query
-	meta   map[string]interface{}
+	filter	elastic.Query
+	meta	map[string]interface{}
+	*Injectable
 }
 
 func NewFilterAggregation() *FilterAggregation {
 	a := &FilterAggregation{}
-	a.tree = nilAggregationTree(a)
-
+	a.Injectable = newInjectable(a)
 	return a
 }
 

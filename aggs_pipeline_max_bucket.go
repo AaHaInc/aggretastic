@@ -1,3 +1,7 @@
+// Copyright 2012-present Oliver Eilhard. All rights reserved.
+// Use of this source code is governed by a MIT-license.
+// See http://olivere.mit-license.org/license.txt for details.
+
 package aggretastic
 
 // MaxBucketAggregation is a sibling pipeline aggregation which identifies
@@ -9,13 +13,12 @@ package aggretastic
 // For more details, see
 // https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search-aggregations-pipeline-max-bucket-aggregation.html
 type MaxBucketAggregation struct {
-	*notInjectable
+	format		string
+	gapPolicy	string
 
-	format    string
-	gapPolicy string
-
-	meta         map[string]interface{}
-	bucketsPaths []string
+	meta		map[string]interface{}
+	bucketsPaths	[]string
+	*NotInjectable
 }
 
 // NewMaxBucketAggregation creates and initializes a new MaxBucketAggregation.
@@ -23,8 +26,7 @@ func NewMaxBucketAggregation() *MaxBucketAggregation {
 	a := &MaxBucketAggregation{
 		bucketsPaths: make([]string, 0),
 	}
-	a.notInjectable = newNotInjectable(a)
-
+	a.NotInjectable = newNotInjectable(a)
 	return a
 }
 
