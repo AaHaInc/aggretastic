@@ -32,8 +32,8 @@ script:
 after_success:
 - curl -o /tmp/travis-automerge https://raw.githubusercontent.com/cdown/travis-automerge/master/travis-automerge
 - chmod a+x /tmp/travis-automerge
-- BRANCHES_TO_MERGE_REGEX=testing BRANCH_TO_MERGE_INTO=master GITHUB_REPO=dkonovenschi/aggretastic
+- BRANCHES_TO_MERGE_REGEX=testing BRANCH_TO_MERGE_INTO=master GITHUB_REPO=AaHaInc/aggretastic
   /tmp/travis-automerge
 env:
   global:
-    secure: NMoOxBYIGUAdOApctosuizHbCQO0MehaYVJfi8ba5e0aKM9hI1DA63rHCDreZlWB+KNW/EmdWua/67SZ+y9eoHbjWEU1uj8lw/7suWRHGA2qPy2sB1qo7VLgdLOvnRaZ3Gsj0Si7fUZ5D6QjqttDuz++R527eI9+8KIAr6hzWfLEQhoTzYxbu29UNRUDo9dMJ2Zyw1mT+Rsj8Puqheb8YrHvjstlkkTIycXEzoHHn3cmjZkgtw+fCJZRZ0Bh4qyUm0KQFvd6Jlbzvaqc6uqeN9ZyRgzEtpfuRTPQWDT2bh6s63dDk1tojOvepHSJonRXQKYpCh0mMy492ZCTUTytcMR1h/liCRakvJpZtpRYCpmPrnMXo+sYs8rA+tlY6eYY87vfmoOQgD/nWlz40SNT55XWvi57bNKetczE6lzEuYI2jAjG6wtkdJ+1xzMsQf/MkLcmVSHp36WrOISdqHEnoWiFdjDMoZG9KXg/P5U3tO8YBQe9XbnOlSFinCtUolr0LSMViiUz7u+Ol5BaYEVuganeQ37hHJ/rYvK1WooiV6s0foFJE8d8IgOHslPiG7c5qlMdI2vt8Htt8QIEzLSol0mtVvgPoRYtomzFU2XWQ4ikN2xxD6zKCzY5DcikrtiAhVuPVBakdCuU3gk+s9Bg3XPNWejDwpknCiHFF4chTfU=
+    secure: PASTE_YOUR_KEY_HERE

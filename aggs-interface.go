@@ -3,9 +3,9 @@
 // The aggretastic package enables manipulation of
 // a olivere/elastic subAggregations tree with high fidelity.
 //
-//	Injectable: https://godoc.org/github.com/dkonovenschi/aggretastic/#Injectable
-//	NotInjectable: https://godoc.org/github.com/dkonovenschi/aggretastic/#NotInjectable
-//	Aggregations: https://godoc.org/github.com/dkonovenschi/aggretastic/#Aggregations
+//	Injectable: https://godoc.org/github.com/AaHaInc/aggretastic/#Injectable
+//	NotInjectable: https://godoc.org/github.com/AaHaInc/aggretastic/#NotInjectable
+//	Aggregations: https://godoc.org/github.com/AaHaInc/aggretastic/#Aggregations
 //
 //
 package aggretastic
