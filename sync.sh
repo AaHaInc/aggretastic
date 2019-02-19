@@ -2,10 +2,10 @@
 cwd=$(pwd)
 go get -u github.com/olivere/elastic
 
-if [ ! -f sync.ex ]; then
+if [ ! -f sync ]; then
     cd synchronizer
-    go build -o sync.ex
-    cp sync.ex ../
+    go build -o sync
+    cp sync ../
     cd ../
 fi
 
