@@ -1,156 +1,134 @@
 package aggretastic
 
 import (
-	"errors"
-	"github.com/olivere/elastic"
+	"bytes"
+	"encoding/json"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"reflect"
 )
 
-func Call(function interface{}, params ...interface{}) (result []reflect.Value, err error) {
-	f := reflect.ValueOf(function)
-	if len(params) != f.Type().NumIn() {
-		err = errors.New("The number of params is not adapted.")
-		return
+func makeInjection(agg, inj Aggregation, x bool, path ...string) {
+	var injectErr error
+	if x {
+		injectErr = agg.InjectX(inj, path...)
+	} else {
+		injectErr = agg.Inject(inj, path...)
 	}
-	in := make([]reflect.Value, len(params))
-	for k, param := range params {
-		in[k] = reflect.ValueOf(param)
-	}
-	result = f.Call(in)
-	return
+	Expect(injectErr).ShouldNot(HaveOccurred())
+}
+
+func compareAggregationToSource(firstAgg Aggregation, secondAggSrc interface{}) bool {
+	firstAggSrc, err := firstAgg.Source()
+	Expect(err).ShouldNot(HaveOccurred())
+
+	jsonOne, _ := json.Marshal(firstAggSrc)
+	jsonTwo, _ := json.Marshal(secondAggSrc)
+	return bytes.Compare(jsonOne, jsonTwo) == 0
+}
+
+func testInjection(maxAgg, avgAgg Aggregation, maxAggSource, avgAggSource interface{}, x bool) {
+	makeInjection(maxAgg, avgAgg, x, "any_path")
+
+	equal := compareAggregationToSource(maxAgg, maxAggSource)
+	Expect(equal).To(Equal(false))
+
+	equal = compareAggregationToSource(maxAgg.Select("any_path"), avgAggSource)
+	Expect(equal).To(Equal(true))
+
+	maxAggSource, _ = maxAgg.Source()
+
+	avgAgg = NewAvgAggregation()
+	avgAggSource, _ = avgAgg.Source()
+
+	makeInjection(maxAgg, avgAgg, x, "any_path", "other_path")
+
+	equal = compareAggregationToSource(maxAgg, maxAggSource)
+	Expect(equal).To(Equal(false))
+
+	equal = compareAggregationToSource(maxAgg.Select("any_path", "other_path"), avgAggSource)
+	Expect(equal).To(Equal(true))
+
+	avgAgg = NewAvgAggregation()
+	avgAggSource, _ = avgAgg.Source()
+
+	makeInjection(avgAgg, NewAvgAggregation(), x, "other_path")
+	avgAggSource, _ = avgAgg.Source()
+
+	equal = compareAggregationToSource(maxAgg.Select("any_path"), avgAggSource)
+	Expect(equal).To(Equal(true))
 }
 
 var _ = Describe("Injectable", func() {
-	ch1 := make(chan Aggregation, len(aggMap["Injectable"]))
-	ch2 := make(chan Aggregation, len(aggMap["Injectable"]))
-	ch3 := make(chan Aggregation, len(aggMap["Injectable"]))
-	ch4 := make(chan Aggregation, len(aggMap["Injectable"]))
-	ch5 := make(chan Aggregation, len(aggMap["Injectable"]))
-	ch6 := make(chan Aggregation, len(aggMap["Injectable"]))
-	ch7 := make(chan Aggregation, len(aggMap["Injectable"]))
-	for name, funct := range aggMap["Injectable"] {
-		Describe(name + " Injects", func() {
+	var maxAgg *MaxAggregation
+	var maxAggSource interface{}
 
-			ch1 <- getSample(name, funct)
-			It(name + " should inject aggregations", func() {
-				injectTest(ch1)
-			})
+	var avgAgg *AvgAggregation
+	var avgAggSource interface{}
 
-			ch2 <- getSample(name, funct)
-			It(name + " should injectX aggregations", func() {
-				injectXTest(ch2)
-			})
+	BeforeEach(func() {
+		maxAgg = NewMaxAggregation()
+		maxAggSource, _ = maxAgg.Source()
+
+		avgAgg = NewAvgAggregation()
+		avgAggSource, _ = avgAgg.Source()
+	})
+	Describe(" Injects", func() {
+
+		It(" should inject aggregations", func() {
+			testInjection(maxAgg, avgAgg, maxAggSource, avgAggSource, false)
 		})
 
-		Describe(name + " Getters", func() {
-			ch3 <- getSample(name, funct)
-			It(name + " should receive subAggregations", func() {
-				getAllSubsTest(ch3)
-			})
+		It(" should injectX aggregations", func() {
+			testInjection(maxAgg, avgAgg, maxAggSource, avgAggSource, true)
 
-			ch4 <- getSample(name, funct)
-			It(name + " should select aggregations", func() {
-				selectTest(ch4)
-			})
+			bucketAggCopy, _ := maxAgg.Source()
+			avgAgg := NewAvgAggregation()
 
-			ch5 <- getSample(name, funct)
-			It(name + " should pop aggregations", func() {
-				popTest(ch5)
-			})
-		})
+			makeInjection(avgAgg, NewAvgAggregation(), false, "alter_path")
+			makeInjection(maxAgg, avgAgg, true, "any_path")
+			equal := compareAggregationToSource(maxAgg, bucketAggCopy)
+			Expect(equal).To(Equal(true))
 
-		Describe(name + " Exports", func() {
-			ch6 <- getSample(name, funct)
-			It(" should export root", func() {
-				exportTest(ch6)
-			})
-			ch7 <- getSample(name, funct)
-			It(name + " should export source", func() {
-				sourceTest(ch7)
-			})
+			makeInjection(maxAgg, avgAgg, true, "any_path", "other_path")
+			equal = compareAggregationToSource(maxAgg, bucketAggCopy)
+			Expect(equal).To(Equal(true))
 
 		})
-	}
+	})
+
+	Describe(" Getters", func() {
+		It(" should select aggregations", func() {
+			makeInjection(maxAgg, avgAgg, false, "any_path")
+			sel := maxAgg.Select("any_path")
+			Expect(sel).NotTo(BeNil())
+			Expect(sel.Source()).To(Equal(avgAggSource))
+		})
+
+		It(" should pop aggregations", func() {
+			makeInjection(maxAgg, avgAgg, false, "any_path")
+
+			maxAggSource, _ = maxAgg.Source()
+			sel := maxAgg.Pop("any_path")
+			Expect(sel).NotTo(BeNil())
+			Expect(sel.Source()).To(Equal(avgAggSource))
+
+			maxAggCopySrc, sourceErr := maxAgg.Source()
+			Expect(sourceErr).ShouldNot(HaveOccurred())
+			Expect(maxAggSource).NotTo(Equal(maxAggCopySrc))
+		})
+	})
+
+	Describe(" Exports", func() {
+		It(" should export root", func() {
+			root := maxAgg.Export()
+			Expect(root).To(Equal(maxAgg))
+		})
+		It(" should export source", func() {
+			src, err := maxAgg.Source()
+			Expect(src).NotTo(BeNil())
+			Expect(err).ShouldNot(HaveOccurred())
+		})
+
+	})
+
 })
-
-func injectTest(ch chan Aggregation) {
-	sample := <-ch
-	sampleSource, _ := sample.Source()
-
-	injectErr := sample.Inject(NewAvgAggregation(), "any_path")
-	Expect(injectErr).ShouldNot(HaveOccurred())
-
-	sampleSource2, sourceErr := sample.Source()
-	Expect(sourceErr).ShouldNot(HaveOccurred())
-
-	Expect(sampleSource).ToNot(Equal(sampleSource2))
-}
-
-func injectXTest(ch chan Aggregation) {
-	sample := <-ch
-	sampleSource, _ := sample.Source()
-	injectErr := sample.InjectX(NewAvgAggregation(), "any_path")
-	Expect(injectErr).ShouldNot(HaveOccurred())
-
-	sampleSource2, sourceErr := sample.Source()
-	Expect(sourceErr).ShouldNot(HaveOccurred())
-	Expect(sampleSource).ToNot(Equal(sampleSource2))
-
-	injectXErr := sample.InjectX(NewAvgAggregation(), "any_path")
-	Expect(injectXErr).ShouldNot(HaveOccurred())
-
-	sampleSource3, sourceErr := sample.Source()
-	Expect(sourceErr).ShouldNot(HaveOccurred())
-	Expect(sampleSource2).To(Equal(sampleSource3))
-}
-
-func getAllSubsTest(ch chan Aggregation) {
-	sample := <-ch
-	subs := sample.GetAllSubs()
-	Expect(subs).NotTo(BeNil())
-}
-
-func selectTest(ch chan Aggregation) {
-	sample := <-ch
-	_ = sample.Inject(NewAvgAggregation(), "any_path")
-	sel := sample.Select("any_path")
-	Expect(sel).NotTo(BeNil())
-}
-
-func popTest(ch chan Aggregation) {
-	sample := <-ch
-	sampleSource, _ := sample.Source()
-
-	_ = sample.Inject(NewAvgAggregation(), "any_path")
-	sampleSource, _ = sample.Source()
-	sel := sample.Pop("any_path")
-	Expect(sel).NotTo(BeNil())
-
-	sampleSource2, sourceErr := sample.Source()
-	Expect(sourceErr).ShouldNot(HaveOccurred())
-	Expect(sampleSource).NotTo(Equal(sampleSource2))
-}
-
-func exportTest(ch chan Aggregation) {
-	sample := <-ch
-	root := sample.Export()
-	Expect(root).To(Equal(sample))
-}
-
-func sourceTest(ch chan Aggregation) {
-	sample := <-ch
-	src, err := sample.Source()
-	Expect(src).NotTo(BeNil())
-	Expect(err).ShouldNot(HaveOccurred())
-}
-
-func getSample(name string, funct interface{}) Aggregation {
-	r, _ := Call(funct)
-	sample, _ := r[0].Interface().(Aggregation)
-	if name == "NewFilterAggregation" {
-		sample.(*FilterAggregation).Filter(elastic.NewTermQuery("user", "olivere"))
-	}
-	return sample
-}

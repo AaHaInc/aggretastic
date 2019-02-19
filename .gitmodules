@@ -1,0 +1,3 @@
+[submodule "synchronizer"]
+	path = synchronizer
+	url = git@github.com:dkonovenschi/aggretastic-sync.git

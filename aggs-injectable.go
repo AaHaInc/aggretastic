@@ -20,14 +20,16 @@ func newInjectable(root elastic.Aggregation) *Injectable {
 	}
 }
 
+
 // Checks if Aggregation is Injectable
-func IsInjectable(t Aggregation) bool {
-	return t == nil || t.Export() == nil
+func IsInjectable(agg Aggregation) bool {
+	_, ok := agg.(*Injectable)
+	return ok
 }
 
-// Deprecated function. Keep for back-compatibility
+// Checks if Aggregation is nil
 func IsNilTree(t Aggregation) bool {
-	return IsInjectable(t)
+	return t == nil || t.Export() == nil
 }
 
 // Inject sets new subAgg into the map of subAggregations
@@ -43,7 +45,7 @@ func (a *Injectable) Inject(subAggregation Aggregation, path ...string) error {
 
 	// deeper inject
 	cursor := a.Select(path[:len(path)-1]...)
-	if IsInjectable(cursor) {
+	if IsNilTree(cursor) {
 		return ErrPathNotSelectable
 	}
 
@@ -56,7 +58,7 @@ func (a *Injectable) InjectX(subAggregation Aggregation, path ...string) error {
 		return ErrNoPath
 	}
 
-	if alreadyInjected := a.Select(path...); IsInjectable(alreadyInjected) {
+	if alreadyInjected := a.Select(path...); IsNilTree(alreadyInjected) {
 		return a.Inject(subAggregation, path...)
 	}
 
@@ -109,6 +111,13 @@ func (a *Injectable) Pop(path ...string) Aggregation {
 func (a *Injectable) Export() elastic.Aggregation {
 	return a.root
 }
+
+// Source returns a JSON-serializable aggregation that is a fragment
+// of the request sent to Elasticsearch.
+func (a *Injectable) Source() (interface{}, error) {
+	return a.root.Source()
+}
+
 
 // Shorthand type for collection of Aggregations
 type Aggregations map[string]Aggregation
