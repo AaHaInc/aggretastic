@@ -3,7 +3,7 @@
 
 package aggretastic
 
-import "github.com/olivere/elastic"
+import "github.com/olivere/elastic/v7"
 
 // BucketScriptAggregation is a parent pipeline aggregation which executes
 // a script which can perform per bucket computations on specified metrics

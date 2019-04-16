@@ -1,6 +1,6 @@
 package aggretastic
 
-import "github.com/olivere/elastic"
+import "github.com/olivere/elastic/v7"
 
 // SignificantTermsAggregation is an aggregation that returns interesting
 // or unusual occurrences of terms in a set.

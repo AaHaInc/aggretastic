@@ -1,6 +1,6 @@
 package aggretastic
 
-import "github.com/olivere/elastic"
+import "github.com/olivere/elastic/v7"
 
 // BucketSortAggregation parent pipeline aggregation which sorts the buckets
 // of its parent multi-bucket aggregation. Zero or more sort fields may be

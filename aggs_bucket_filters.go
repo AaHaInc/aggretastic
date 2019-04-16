@@ -2,7 +2,7 @@ package aggretastic
 
 import (
 	"errors"
-	"github.com/olivere/elastic"
+	"github.com/olivere/elastic/v7"
 )
 
 // FiltersAggregation defines a multi bucket aggregations where each bucket

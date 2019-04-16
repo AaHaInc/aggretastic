@@ -1,6 +1,6 @@
 package aggretastic
 
-import "github.com/olivere/elastic"
+import "github.com/olivere/elastic/v7"
 
 // MinAggregation is a single-value metrics aggregation that keeps track and
 // returns the minimum value among numeric values extracted from the

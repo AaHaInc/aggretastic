@@ -2,7 +2,7 @@ package aggretastic
 
 import (
 	"fmt"
-	"github.com/olivere/elastic"
+	"github.com/olivere/elastic/v7"
 )
 
 // declare an elastic script for every math operation

@@ -1,6 +1,6 @@
 package aggretastic
 
-import "github.com/olivere/elastic"
+import "github.com/olivere/elastic/v7"
 
 // CompositeAggregation is a multi-bucket values source based aggregation
 // that can be used to calculate unique composite values from source documents.

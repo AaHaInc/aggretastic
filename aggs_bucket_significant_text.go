@@ -1,6 +1,6 @@
 package aggretastic
 
-import "github.com/olivere/elastic"
+import "github.com/olivere/elastic/v7"
 
 // SignificantTextAggregation returns interesting or unusual occurrences
 // of free-text terms in a set.

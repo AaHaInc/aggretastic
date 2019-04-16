@@ -1,6 +1,6 @@
 package aggretastic
 
-import "github.com/olivere/elastic"
+import "github.com/olivere/elastic/v7"
 
 // AvgAggregation is a single-value metrics aggregation that computes
 // the average of numeric values that are extracted from the

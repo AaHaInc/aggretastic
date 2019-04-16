@@ -1,6 +1,6 @@
 package aggretastic
 
-import "github.com/olivere/elastic"
+import "github.com/olivere/elastic/v7"
 
 // PercentilesAggregation is a multi-value metrics aggregation
 // that calculates one or more percentiles over numeric values

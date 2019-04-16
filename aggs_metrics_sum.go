@@ -1,6 +1,6 @@
 package aggretastic
 
-import "github.com/olivere/elastic"
+import "github.com/olivere/elastic/v7"
 
 // SumAggregation is a single-value metrics aggregation that sums up
 // numeric values that are extracted from the aggregated documents.

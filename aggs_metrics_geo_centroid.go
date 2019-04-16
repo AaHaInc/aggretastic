@@ -1,6 +1,6 @@
 package aggretastic
 
-import "github.com/olivere/elastic"
+import "github.com/olivere/elastic/v7"
 
 // GeoCentroidAggregation is a metric aggregation that computes the weighted centroid
 // from all coordinate values for a Geo-point datatype field.

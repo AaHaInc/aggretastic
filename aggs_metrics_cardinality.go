@@ -1,6 +1,6 @@
 package aggretastic
 
-import "github.com/olivere/elastic"
+import "github.com/olivere/elastic/v7"
 
 // CardinalityAggregation is a single-value metrics aggregation that
 // calculates an approximate count of distinct values.
