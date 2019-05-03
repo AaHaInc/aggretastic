@@ -1,6 +1,6 @@
 package aggretastic
 
-import "github.com/olivere/elastic"
+import "github.com/olivere/elastic/v7"
 
 // ScriptedMetricAggregation
 // wip (larry) careful to be used

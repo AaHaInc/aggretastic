@@ -1,6 +1,6 @@
 package aggretastic
 
-import "github.com/olivere/elastic"
+import "github.com/olivere/elastic/v7"
 
 // ExtendedExtendedStatsAggregation is a multi-value metrics aggregation that
 // computes stats over numeric values extracted from the aggregated documents.

@@ -1,6 +1,6 @@
 package aggretastic
 
-import "github.com/olivere/elastic"
+import "github.com/olivere/elastic/v7"
 
 // BucketSelectorAggregation is a parent pipeline aggregation which
 // determines whether the current bucket will be retained in the parent

@@ -1,6 +1,6 @@
 package aggretastic
 
-import "github.com/olivere/elastic"
+import "github.com/olivere/elastic/v7"
 
 // GeoBoundsAggregation is a metric aggregation that computes the
 // bounding box containing all geo_point values for a field.

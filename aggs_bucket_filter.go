@@ -1,6 +1,6 @@
 package aggretastic
 
-import "github.com/olivere/elastic"
+import "github.com/olivere/elastic/v7"
 
 // FilterAggregation defines a single bucket of all the documents
 // in the current document set context that match a specified filter.

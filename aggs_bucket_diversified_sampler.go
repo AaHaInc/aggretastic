@@ -1,6 +1,6 @@
 package aggretastic
 
-import "github.com/olivere/elastic"
+import "github.com/olivere/elastic/v7"
 
 // DiversifiedSamplerAggregation Like the ‘sampler` aggregation this is a filtering aggregation used to limit any
 // sub aggregations’ processing to a sample of the top-scoring documents. The diversified_sampler aggregation adds

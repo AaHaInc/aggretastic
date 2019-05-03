@@ -1,6 +1,6 @@
 package aggretastic
 
-import "github.com/olivere/elastic"
+import "github.com/olivere/elastic/v7"
 
 // AdjacencyMatrixAggregation returning a form of adjacency matrix.
 // The request provides a collection of named filter expressions,

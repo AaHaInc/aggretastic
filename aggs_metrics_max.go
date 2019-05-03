@@ -1,6 +1,6 @@
 package aggretastic
 
-import "github.com/olivere/elastic"
+import "github.com/olivere/elastic/v7"
 
 // MaxAggregation is a single-value metrics aggregation that keeps track and
 // returns the maximum value among the numeric values extracted from

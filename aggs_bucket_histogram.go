@@ -1,6 +1,6 @@
 package aggretastic
 
-import "github.com/olivere/elastic"
+import "github.com/olivere/elastic/v7"
 
 // HistogramAggregation is a multi-bucket values source based aggregation
 // that can be applied on numeric values extracted from the documents.

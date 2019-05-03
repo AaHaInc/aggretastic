@@ -1,6 +1,6 @@
 package aggretastic
 
-import "github.com/olivere/elastic"
+import "github.com/olivere/elastic/v7"
 
 // ValueCountAggregation is a single-value metrics aggregation that counts
 // the number of values that are extracted from the aggregated documents.
