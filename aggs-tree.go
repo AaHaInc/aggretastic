@@ -3,6 +3,7 @@ package aggretastic
 import (
 	"fmt"
 	"github.com/olivere/elastic/v7"
+	"log"
 )
 
 var (
@@ -264,11 +265,18 @@ func (a *Aggregations) InjectSafe(subAgg Aggregation, path ...string) error {
 		return ErrNoPath
 	}
 
+	name := path[0]
+
 	if len(path) == 1 {
-		return a.InjectSafe(subAgg, path[0])
+		if _, ok := (*a)[name]; !ok {
+			(*a)[name] = subAgg
+		}
+
+		// @todo
+		log.Println("warning! maybe unexpected behaviour. Edge case, need handling")
+		return nil
 	}
 
-	name := path[0]
 	path = path[1:]
 	if _, ok := (*a)[name]; !ok {
 		return ErrAggIsNotInjectable
