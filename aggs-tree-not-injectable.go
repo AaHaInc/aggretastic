@@ -26,6 +26,10 @@ func (a *notInjectable) InjectX(subAggregation Aggregation, path ...string) erro
 	return ErrAggIsNotInjectable
 }
 
+func (a *notInjectable) InjectSafe(subAggregation Aggregation, path ...string) error {
+	return ErrAggIsNotInjectable
+}
+
 func (a *notInjectable) GetAllSubs() map[string]Aggregation {
 	return nil
 }

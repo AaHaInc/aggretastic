@@ -28,6 +28,9 @@ type Aggregation interface {
 	// InjectX sets new subAgg into the map of subAggregations only if it NOT exists already
 	InjectX(subAgg Aggregation, path ...string) error
 
+	// InjectSafe sets new subAgg into the map of subAggregations in the SAFE mode
+	InjectSafe(subAgg Aggregation, path ...string) error
+
 	// Select returns any subAgg by it's path
 	Select(path ...string) Aggregation
 
@@ -80,6 +83,27 @@ func (a *tree) InjectX(subAggregation Aggregation, path ...string) error {
 
 	if alreadyInjected := a.Select(path...); IsNilTree(alreadyInjected) {
 		return a.Inject(subAggregation, path...)
+	}
+
+	return nil
+}
+
+func (a *tree) InjectSafe(subAggregation Aggregation, path ...string) error {
+	if len(path) == 0 {
+		return ErrNoPath
+	}
+
+	// extracting the sub tree
+	subTree := a.Select(path...)
+
+	if IsNilTree(subTree) {
+		return a.Inject(subAggregation, path...)
+	}
+
+	for k, subAggDeep := range subAggregation.GetAllSubs() {
+		if err := subTree.InjectSafe(subAggDeep, k); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -233,4 +257,22 @@ func (a *Aggregations) InjectX(subAgg Aggregation, path ...string) error {
 	}
 
 	return (*a)[name].InjectX(subAgg, path...)
+}
+
+func (a *Aggregations) InjectSafe(subAgg Aggregation, path ...string) error {
+	if len(path) == 0 {
+		return ErrNoPath
+	}
+
+	if len(path) == 1 {
+		return a.InjectSafe(subAgg, path[0])
+	}
+
+	name := path[0]
+	path = path[1:]
+	if _, ok := (*a)[name]; !ok {
+		return ErrAggIsNotInjectable
+	}
+
+	return (*a)[name].InjectSafe(subAgg, path...)
 }
