@@ -18,16 +18,23 @@ func IsNotInjectable(agg Aggregation) bool {
 	return ok
 }
 
-func (a *notInjectable) Inject(subAggregation Aggregation, path ...string) error {
-	return ErrAggIsNotInjectable
+func (a *notInjectable) ExtractLeafPaths() (leafs [][]string) {
+	return make([][]string, 0)
 }
 
-func (a *notInjectable) InjectX(subAggregation Aggregation, path ...string) error {
-	return ErrAggIsNotInjectable
+func (a *notInjectable) Inject(subAggregation Aggregation, path ...string) (resultPaths [][]string, err error) {
+	err = ErrAggIsNotInjectable
+	return
 }
 
-func (a *notInjectable) InjectSafe(subAggregation Aggregation, path ...string) error {
-	return ErrAggIsNotInjectable
+func (a *notInjectable) InjectX(subAggregation Aggregation, path ...string) (resultPaths [][]string, err error) {
+	err = ErrAggIsNotInjectable
+	return
+}
+
+func (a *notInjectable) InjectSafe(subAggregation Aggregation, path ...string) (resultPaths [][]string, err error) {
+	err = ErrAggIsNotInjectable
+	return
 }
 
 func (a *notInjectable) GetAllSubs() map[string]Aggregation {
