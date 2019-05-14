@@ -151,9 +151,6 @@ func (a *tree) InjectSafe(subAggregation Aggregation, path ...string) (resultPat
 	}
 
 	resultPaths = getIntersectedPaths(a.subAggregations, subAggregation, path)
-	for i := range resultPaths {
-		resultPaths[i] = append(path, resultPaths[i]...)
-	}
 
 	return
 }
