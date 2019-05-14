@@ -105,7 +105,7 @@ func (a *tree) Inject(subAggregation Aggregation, path ...string) (resultPaths [
 		return
 	}
 
-	resultPaths = getIntersectedPaths(a.subAggregations, subAggregation)
+	resultPaths = getIntersectedPaths(a.subAggregations, subAggregation, path)
 	return
 }
 
@@ -150,7 +150,7 @@ func (a *tree) InjectSafe(subAggregation Aggregation, path ...string) (resultPat
 		}
 	}
 
-	resultPaths = getIntersectedPaths(a.subAggregations, subAggregation)
+	resultPaths = getIntersectedPaths(a.subAggregations, subAggregation, path)
 	for i := range resultPaths {
 		resultPaths[i] = append(path, resultPaths[i]...)
 	}
@@ -287,7 +287,13 @@ func (a *Aggregations) Inject(subAgg Aggregation, path ...string) (resultPaths [
 		return
 	}
 
-	return (*a)[name].Inject(subAgg, path...)
+	resultPaths, err = (*a)[name].Inject(subAgg, path...)
+	if err == nil {
+		for i := range resultPaths {
+			resultPaths[i] = append([]string{name}, resultPaths[i]...)
+		}
+	}
+	return
 }
 
 func (a *Aggregations) InjectX(subAgg Aggregation, path ...string) (resultPaths [][]string, err error) {
@@ -370,7 +376,7 @@ func (a *Aggregations) InjectSafe(subAgg Aggregation, path ...string) (resultPat
 //
 
 // getIntersectedPaths returns leafs' paths that intersects of agg and its subAgg
-func getIntersectedPaths(rootAggs map[string]Aggregation, injectingAgg Aggregation) [][]string {
+func getIntersectedPaths(rootAggs map[string]Aggregation, injectingAgg Aggregation, injectPath []string) [][]string {
 	paths := make([][]string, 0)
 
 	rootLeafs := make([][]string, 0)
@@ -385,6 +391,10 @@ func getIntersectedPaths(rootAggs map[string]Aggregation, injectingAgg Aggregati
 	}
 
 	givenLeafPaths := injectingAgg.ExtractLeafPaths()
+	for i := range givenLeafPaths {
+		givenLeafPaths[i] = append(injectPath, givenLeafPaths[i]...)
+	}
+
 	for _, resultLeaf := range rootLeafs {
 		for _, givenLeaf := range givenLeafPaths {
 			if pathIsLeafOf(givenLeaf, resultLeaf) {
