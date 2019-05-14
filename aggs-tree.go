@@ -392,7 +392,7 @@ func pathIsLeafOf(childPath, parentPath []string) bool {
 	}
 
 	if len(parentPath) > len(childPath) {
-		parentPath = parentPath[:len(childPath)]
+		parentPath = parentPath[len(parentPath)-len(childPath):]
 	}
 
 	var diff bool
