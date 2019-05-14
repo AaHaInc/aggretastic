@@ -336,7 +336,11 @@ func (a *Aggregations) InjectSafe(subAgg Aggregation, path ...string) (resultPat
 	if len(path) == 1 {
 		if _, ok := (*a)[name]; !ok {
 			(*a)[name] = subAgg
-			// @todo result paths
+			resultPaths = subAgg.ExtractLeafPaths()
+			for i := range resultPaths {
+				// prepend name
+				resultPaths[i] = append([]string{name}, resultPaths[i]...)
+			}
 			return
 		}
 
@@ -351,7 +355,14 @@ func (a *Aggregations) InjectSafe(subAgg Aggregation, path ...string) (resultPat
 		return
 	}
 
-	return (*a)[name].InjectSafe(subAgg, path...)
+	if resultPaths, err = (*a)[name].InjectSafe(subAgg, path...); err == nil {
+		// prepend name to result paths
+		for i := range resultPaths {
+			resultPaths[i] = append([]string{name}, resultPaths[i]...)
+		}
+	}
+
+	return
 }
 
 //
