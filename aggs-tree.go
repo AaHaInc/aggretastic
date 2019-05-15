@@ -70,7 +70,12 @@ func (a *tree) ExtractLeafPaths() (leafs [][]string) {
 	}
 
 	for leafName, leafAgg := range a.subAggregations {
-		for _, leaf := range leafAgg.ExtractLeafPaths() {
+		extractedLeafs := leafAgg.ExtractLeafPaths()
+		if len(extractedLeafs) == 0 {
+			leafs = append(leafs, []string{leafName})
+			break
+		}
+		for _, leaf := range extractedLeafs {
 			leafs = append(leafs, append([]string{leafName}, leaf...))
 		}
 	}
