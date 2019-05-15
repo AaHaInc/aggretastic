@@ -106,11 +106,14 @@ func (a *tree) Inject(subAggregation Aggregation, path ...string) (resultPaths [
 		return
 	}
 
-	if _, err = cursor.Inject(subAggregation, path[len(path)-1]); err != nil {
+	if resultPaths, err = cursor.Inject(subAggregation, path[len(path)-1]); err != nil {
 		return
+	} else {
+		for j := range resultPaths {
+			resultPaths[j] = append(path[:len(path)-1], resultPaths[j]...)
+		}
 	}
 
-	resultPaths = getIntersectedPaths(a.subAggregations, subAggregation, path)
 	return
 }
 
