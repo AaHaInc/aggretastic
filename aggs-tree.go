@@ -151,14 +151,21 @@ func (a *tree) InjectSafe(subAggregation Aggregation, path ...string) (resultPat
 	}
 
 	for k, subAggDeep := range subAggregation.GetAllSubs() {
-		_, injectErr := subTree.InjectSafe(subAggDeep, k)
+		kResultPaths, injectErr := subTree.InjectSafe(subAggDeep, k)
 		if injectErr != nil {
 			err = injectErr
 			return
 		}
-	}
+		if len(kResultPaths) > 0 {
+			for j := range kResultPaths {
+				kResultPaths[j] = append(path, kResultPaths[j]...)
+			}
+		} else {
+			kResultPaths = append(kResultPaths, append(path, k))
+		}
 
-	resultPaths = getIntersectedPaths(a.subAggregations, subAggregation, path)
+		resultPaths = append(resultPaths, kResultPaths...)
+	}
 
 	return
 }
