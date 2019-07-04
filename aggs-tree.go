@@ -24,13 +24,13 @@ type Aggregation interface {
 	GetAllSubs() map[string]Aggregation
 
 	// Inject sets new subAgg into the map of subAggregations
-	Inject(subAgg Aggregation, path ...string) error
+	Inject(subAgg Aggregation, path ...string) (resultPaths [][]string, err error)
 
 	// InjectX sets new subAgg into the map of subAggregations only if it NOT exists already
-	InjectX(subAgg Aggregation, path ...string) error
+	InjectX(subAgg Aggregation, path ...string) (resultPaths [][]string, err error)
 
 	// InjectSafe sets new subAgg into the map of subAggregations in the SAFE mode
-	InjectSafe(subAgg Aggregation, path ...string) error
+	InjectSafe(subAgg Aggregation, path ...string) (resultPaths [][]string, err error)
 
 	// Select returns any subAgg by it's path
 	Select(path ...string) Aggregation
@@ -40,6 +40,9 @@ type Aggregation interface {
 
 	// Export returns the same object in original Agg interface
 	Export() elastic.Aggregation
+
+	// ExtractLeafPaths returns paths the leafs
+	ExtractLeafPaths() [][]string
 }
 
 func IsNilTree(t Aggregation) bool {
@@ -58,40 +61,86 @@ func nilAggregationTree(root elastic.Aggregation) *tree {
 	}
 }
 
-func (a *tree) Inject(subAggregation Aggregation, path ...string) error {
+func (a *tree) ExtractLeafPaths() (leafs [][]string) {
+	leafs = make([][]string, 0)
+
+	if len(a.subAggregations) == 0 {
+		leafs = append(leafs, []string{})
+		return
+	}
+
+	for leafName, leafAgg := range a.subAggregations {
+		extractedLeafs := leafAgg.ExtractLeafPaths()
+		if len(extractedLeafs) == 0 {
+			leafs = append(leafs, []string{leafName})
+			break
+		}
+		for _, leaf := range extractedLeafs {
+			leafs = append(leafs, append([]string{leafName}, leaf...))
+		}
+	}
+
+	return leafs
+}
+
+func (a *tree) Inject(subAggregation Aggregation, path ...string) (resultPaths [][]string, err error) {
+	resultPaths = make([][]string, 0)
+
 	if len(path) == 0 {
-		return ErrNoPath
+		err = ErrNoPath
+		return
 	}
 
 	if len(path) == 1 {
 		a.subAggregations[path[0]] = subAggregation
-		return nil
+		for _, leaf := range subAggregation.ExtractLeafPaths() {
+			resultPaths = append(resultPaths, append(path, leaf...))
+		}
+		return
 	}
 
 	// deeper inject
 	cursor := a.Select(path[:len(path)-1]...)
 	if IsNilTree(cursor) {
-		return ErrPathNotSelectable
+		err = ErrPathNotSelectable
+		return
 	}
 
-	return cursor.Inject(subAggregation, path[len(path)-1])
+	if resultPaths, err = cursor.Inject(subAggregation, path[len(path)-1]); err != nil {
+		return
+	} else {
+		for j := range resultPaths {
+			resultPaths[j] = append(path[:len(path)-1], resultPaths[j]...)
+		}
+	}
+
+	return
 }
 
-func (a *tree) InjectX(subAggregation Aggregation, path ...string) error {
+func (a *tree) InjectX(subAggregation Aggregation, path ...string) (resultPaths [][]string, err error) {
+	resultPaths = make([][]string, 0)
+
 	if len(path) == 0 {
-		return ErrNoPath
+		err = ErrNoPath
+		return
 	}
 
 	if alreadyInjected := a.Select(path...); IsNilTree(alreadyInjected) {
-		return a.Inject(subAggregation, path...)
+		resultPaths, err = a.Inject(subAggregation, path...)
+		if err != nil {
+			return
+		}
 	}
 
-	return nil
+	return
 }
 
-func (a *tree) InjectSafe(subAggregation Aggregation, path ...string) error {
+func (a *tree) InjectSafe(subAggregation Aggregation, path ...string) (resultPaths [][]string, err error) {
+	resultPaths = make([][]string, 0)
+
 	if len(path) == 0 {
-		return ErrNoPath
+		err = ErrNoPath
+		return
 	}
 
 	// extracting the sub tree
@@ -102,12 +151,23 @@ func (a *tree) InjectSafe(subAggregation Aggregation, path ...string) error {
 	}
 
 	for k, subAggDeep := range subAggregation.GetAllSubs() {
-		if err := subTree.InjectSafe(subAggDeep, k); err != nil {
-			return err
+		kResultPaths, injectErr := subTree.InjectSafe(subAggDeep, k)
+		if injectErr != nil {
+			err = injectErr
+			return
 		}
+		if len(kResultPaths) > 0 {
+			for j := range kResultPaths {
+				kResultPaths[j] = append(path, kResultPaths[j]...)
+			}
+		} else {
+			kResultPaths = append(kResultPaths, append(path, k))
+		}
+
+		resultPaths = append(resultPaths, kResultPaths...)
 	}
 
-	return nil
+	return
 }
 
 func (a *tree) GetAllSubs() map[string]Aggregation {
@@ -209,37 +269,56 @@ func (a *Aggregations) Pop(path ...string) Aggregation {
 }
 
 // Inject just puts agg into the map of aggregations
-func (a *Aggregations) Inject(subAgg Aggregation, path ...string) error {
+func (a *Aggregations) Inject(subAgg Aggregation, path ...string) (resultPaths [][]string, err error) {
+	resultPaths = make([][]string, 0)
+
 	if a == nil {
-		return ErrAggIsNotInjectable
+		err = ErrAggIsNotInjectable
+		return
 	}
 
 	if len(path) == 0 {
-		return ErrNoPath
+		err = ErrNoPath
+		return
 	}
 
 	name := path[0]
 
 	if len(path) == 1 {
 		(*a)[name] = subAgg
-		return nil
+		for _, leaf := range subAgg.ExtractLeafPaths() {
+			resultPaths = append(resultPaths, append(path, leaf...))
+		}
+
+		return
 	}
 
 	path = path[1:]
 	if _, ok := (*a)[name]; !ok {
-		return ErrAggIsNotInjectable
+		err = ErrAggIsNotInjectable
+		return
 	}
 
-	return (*a)[name].Inject(subAgg, path...)
+	resultPaths, err = (*a)[name].Inject(subAgg, path...)
+	if err == nil {
+		for i := range resultPaths {
+			resultPaths[i] = append([]string{name}, resultPaths[i]...)
+		}
+	}
+	return
 }
 
-func (a *Aggregations) InjectX(subAgg Aggregation, path ...string) error {
+func (a *Aggregations) InjectX(subAgg Aggregation, path ...string) (resultPaths [][]string, err error) {
+	resultPaths = make([][]string, 0)
+
 	if a == nil {
-		return ErrAggIsNotInjectable
+		err = ErrAggIsNotInjectable
+		return
 	}
 
 	if len(path) == 0 {
-		return ErrNoPath
+		err = ErrNoPath
+		return
 	}
 
 	name := path[0]
@@ -248,21 +327,26 @@ func (a *Aggregations) InjectX(subAgg Aggregation, path ...string) error {
 		if _, ok := (*a)[name]; !ok {
 			(*a)[name] = subAgg
 		}
+		// @tody return path
 
-		return nil
+		return
 	}
 
 	path = path[1:]
 	if _, ok := (*a)[name]; !ok {
-		return ErrAggIsNotInjectable
+		err = ErrAggIsNotInjectable
+		return
 	}
 
 	return (*a)[name].InjectX(subAgg, path...)
 }
 
-func (a *Aggregations) InjectSafe(subAgg Aggregation, path ...string) error {
+func (a *Aggregations) InjectSafe(subAgg Aggregation, path ...string) (resultPaths [][]string, err error) {
+	resultPaths = make([][]string, 0)
+
 	if len(path) == 0 {
-		return ErrNoPath
+		err = ErrNoPath
+		return
 	}
 
 	name := path[0]
@@ -270,17 +354,85 @@ func (a *Aggregations) InjectSafe(subAgg Aggregation, path ...string) error {
 	if len(path) == 1 {
 		if _, ok := (*a)[name]; !ok {
 			(*a)[name] = subAgg
+			resultPaths = subAgg.ExtractLeafPaths()
+			for i := range resultPaths {
+				// prepend name
+				resultPaths[i] = append([]string{name}, resultPaths[i]...)
+			}
+			return
 		}
 
 		// @todo
 		log.Println("warning! maybe unexpected behaviour. Edge case, need handling")
-		return nil
+		return
 	}
 
 	path = path[1:]
 	if _, ok := (*a)[name]; !ok {
-		return ErrAggIsNotInjectable
+		err = ErrAggIsNotInjectable
+		return
 	}
 
-	return (*a)[name].InjectSafe(subAgg, path...)
+	if resultPaths, err = (*a)[name].InjectSafe(subAgg, path...); err == nil {
+		// prepend name to result paths
+		for i := range resultPaths {
+			resultPaths[i] = append([]string{name}, resultPaths[i]...)
+		}
+	}
+
+	return
+}
+
+//
+// helpers
+//
+
+// getIntersectedPaths returns leafs' paths that intersects of agg and its subAgg
+func getIntersectedPaths(rootAggs map[string]Aggregation, injectingAgg Aggregation, injectPath []string) [][]string {
+	paths := make([][]string, 0)
+
+	rootLeafs := make([][]string, 0)
+	if len(rootAggs) == 0 {
+		rootLeafs = append(rootLeafs, []string{})
+	} else {
+		for leafName, leafAgg := range rootAggs {
+			for _, leaf := range leafAgg.ExtractLeafPaths() {
+				rootLeafs = append(rootLeafs, append([]string{leafName}, leaf...))
+			}
+		}
+	}
+
+	givenLeafPaths := injectingAgg.ExtractLeafPaths()
+	for i := range givenLeafPaths {
+		givenLeafPaths[i] = append(injectPath, givenLeafPaths[i]...)
+	}
+
+	for _, resultLeaf := range rootLeafs {
+		for _, givenLeaf := range givenLeafPaths {
+			if pathIsLeafOf(givenLeaf, resultLeaf) {
+				paths = append(paths, resultLeaf)
+			}
+		}
+	}
+
+	return paths
+}
+
+// pathIsLeafOf checks if childPath is a finite leaf of parentPath
+func pathIsLeafOf(childPath, parentPath []string) bool {
+	if len(parentPath) < len(childPath) {
+		return false
+	}
+
+	if len(parentPath) > len(childPath) {
+		parentPath = parentPath[len(parentPath)-len(childPath):]
+	}
+
+	var diff bool
+	for i := range childPath {
+		if childPath[i] != parentPath[i] {
+			diff = true
+		}
+	}
+	return !diff
 }
