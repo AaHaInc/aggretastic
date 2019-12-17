@@ -1,6 +1,8 @@
 package aggretastic
 
-import "github.com/olivere/elastic/v7"
+import (
+	"github.com/olivere/elastic/v7"
+)
 
 // DateHistogramAggregation is a multi-bucket aggregation similar to the
 // histogram except it can only be applied on date values.
@@ -13,7 +15,10 @@ type DateHistogramAggregation struct {
 	missing interface{}
 	meta    map[string]interface{}
 
-	interval          string
+	interval         string
+	fixedInterval    string
+	calendarInterval string
+
 	order             string
 	orderAsc          bool
 	minDocCount       *int64
@@ -60,12 +65,31 @@ func (a *DateHistogramAggregation) Meta(metaData map[string]interface{}) *DateHi
 	return a
 }
 
-// Interval by which the aggregation gets processed.
+// deprecated:
+// Interval by which the aggregation gets processed
 // Allowed values are: "year", "quarter", "month", "week", "day",
 // "hour", "minute". It also supports time settings like "1.5h"
 // (up to "w" for weeks).
+//
+// Use IntervalCalendar OR IntervalFixed instead
 func (a *DateHistogramAggregation) Interval(interval string) *DateHistogramAggregation {
 	a.interval = interval
+	return a
+}
+
+// FixedInterval by which the aggregation gets processed.
+// Allowed values are: "year", "quarter", "month", "week", "day", "hour", "minute".
+// It also supports time settings like "1.5h" (up to "w" for weeks).
+func (a *DateHistogramAggregation) FixedInterval(fixedInterval string) *DateHistogramAggregation {
+	a.fixedInterval = fixedInterval
+	return a
+}
+
+// CalendarInterval by which the aggregation gets processed.
+// Allowed values are: "day" (d, 1d), "week" (w, 1w), "month" (M, 1M), "quarter" (q, 1q), "year" (y, 1y)
+// It does not support multiple units (2d or 3w, etc)
+func (a *DateHistogramAggregation) CalendarInterval(calendarInterval string) *DateHistogramAggregation {
+	a.calendarInterval = calendarInterval
 	return a
 }
 
@@ -230,7 +254,16 @@ func (a *DateHistogramAggregation) Source() (interface{}, error) {
 		opts["missing"] = a.missing
 	}
 
-	opts["interval"] = a.interval
+	if a.interval != "" {
+		opts["interval"] = a.interval
+	}
+	if a.fixedInterval != "" {
+		opts["fixed_interval"] = a.fixedInterval
+	}
+	if a.calendarInterval != "" {
+		opts["calendar_interval"] = a.calendarInterval
+	}
+
 	if a.minDocCount != nil {
 		opts["min_doc_count"] = *a.minDocCount
 	}
